@@ -1,48 +1,70 @@
+import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../library/firebase';
-import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 
+interface DayData {
+  verse: string;
+  videoUrl?: string;
+  isFitnessDay: boolean;
+}
+
 const DailyDevotionalPage = () => {
-  const [verse, setVerse] = useState('');
-  const [videoUrl, setVideoUrl] = useState('');
-  const [isFitnessDay, setIsFitnessDay] = useState(false);
+  const [dayData, setDayData] = useState<any | null>(null);
 
   useEffect(() => {
-    const fetchDevotional = async () => {
-      const today = format(new Date(), 'yyyy-MM-dd');
-      const docRef = doc(db, 'days', today);
+    const fetchData = async () => {
+      const todayStr = format(new Date(), "yyyy-MM-dd");
+      const docRef = doc(db, "days", todayStr);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        const data = docSnap.data();
-        setVerse(data.verse);
-        setVideoUrl(data.videoUrl);
-        setIsFitnessDay(data.isFitnessDay);
+        setDayData(docSnap.data());
       } else {
-        console.log('No devotional found for today.');
+        console.warn("No devotional found for today.");
       }
     };
 
-    fetchDevotional();
+    fetchData();
   }, []);
 
-  return (
-    <div>
-      <h2>Today's Devotional</h2>
-      <p><strong>Verse:</strong> {verse}</p>
+  // Only log when data is ready
+  useEffect(() => {
+    if (dayData) {
+    }
+  }, [dayData]);
 
-      {isFitnessDay && (
+  if (!dayData) return <div>Loading...</div>;
+
+  return (
+    <div style={{ padding: '1rem' }}>
+      <h2>Daily Lift</h2>
+      <h2>Prayer</h2>
+      <p>{dayData.verse}</p>
+
+      {dayData.isFitnessDay && dayData.videoUrl && (
         <>
-          <iframe
-            width="560"
-            height="315"
-            src={videoUrl}
-            title="Workout"
-            frameBorder="0"
-            allowFullScreen
-          ></iframe>
+          <h3>Lift</h3>
+          <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
+            <iframe
+              src={dayData.videoUrl}
+              frameBorder="0"
+              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%"
+              }}
+            ></iframe>
+          </div>
         </>
+      )}
+      {!dayData.isFitnessDay && (
+        <>
+        <h2>Rest Day</h2></>
       )}
     </div>
   );
