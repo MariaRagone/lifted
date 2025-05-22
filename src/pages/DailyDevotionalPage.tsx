@@ -5,6 +5,7 @@ import { format, parseISO } from 'date-fns';
 import { onAuthStateChanged } from 'firebase/auth';
 import './DailyDevotional.css';
 
+
 interface DayData {
   verse: string;
   videoUrl?: string;
@@ -111,7 +112,7 @@ const handleNoteChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
   if (!dayData) return <div>Loading...</div>;
 
   return (
-    <div style={{ padding: '1rem' }}>
+    <div className='daily-container'>
       <h2>Daily Lift for {format(parseISO(todayStr), 'MMMM d')}</h2>
 
       <div className="section-header">
@@ -121,7 +122,7 @@ const handleNoteChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
           checked={checkboxes.prayerDone}
           onChange={() => handleToggle('prayerDone')}
         />
-        <h3>🙏 Prayer</h3>
+        <h3>🙏 Prayer Time</h3>
       </div>
       <p>{dayData.verse}</p>
       <hr />
@@ -135,22 +136,16 @@ const handleNoteChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
               checked={checkboxes.workoutDone}
               onChange={() => handleToggle('workoutDone')}
             />
-            <h3>🏋️ Lift</h3>
+            <h3>🏋️ Fit Challenge</h3>
           </div>
 
-          <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
+          <div className='video'>
             <iframe
               src={dayData.videoUrl}
               frameBorder="0"
               allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-              }}
+             
             ></iframe>
           </div>
           <hr />
@@ -162,7 +157,7 @@ const handleNoteChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
               checked={checkboxes.otherFitnessDone}
               onChange={() => handleToggle('otherFitnessDone')}
             />
-            <h3>📋 Custom Workout</h3>
+            <h3>🏅 Custom Workout</h3>
           </div>
 
           <input
@@ -176,7 +171,7 @@ const handleNoteChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         </>
       )}
 
-      <h3>📖 Notes</h3>
+      <h3>📝 Notes</h3>
         <textarea
           className="input"
           placeholder="Private notes go here!"

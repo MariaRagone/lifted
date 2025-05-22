@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../library/firebase';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/lifted-logo.png';
+import logo from '../assets/daily-lift-logo.png';
 
 
 export default function DashboardPage() {

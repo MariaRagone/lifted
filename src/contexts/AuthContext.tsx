@@ -7,6 +7,7 @@ interface AuthContextType {
   currentUser: User | null;
 }
 
+
 const AuthContext = createContext<AuthContextType>({ currentUser: null });
 
 export function useAuth() {

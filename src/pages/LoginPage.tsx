@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth, provider } from '../library/firebase';
 import { signInWithPopup, onAuthStateChanged } from 'firebase/auth';
 import "./Login.css";
-import logo from '../assets/lifted-logo.png';
+import logo from '../assets/daily-lift-logo.png';
 import icon from '../assets/google-icon.png';
 import "../components/Buttons.css";
 import './Login.css';
@@ -30,6 +30,7 @@ const LoginPage = () => {
       console.error(err);
     }
   };
+  
 
   return (
     <div className="login-container">
