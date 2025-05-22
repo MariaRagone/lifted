@@ -1,0 +1,39 @@
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+}
+
+.themed-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #093d44;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+  position: relative;
+}
+
+.themed-checkbox:checked {
+  background-color: #f1a84d;
+  border-color: #f1a84d;
+}
+
+.themed-checkbox:checked::after {
+  content: '✓';
+  color: white;
+  position: absolute;
+  top: -2px;
+  left: 4px;
+  font-size: 16px;
+}
+
+.input{
+    width: 100%;
+    padding: 3px;
+    margin-top: 0;
+}
