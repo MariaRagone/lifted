@@ -60,7 +60,6 @@ const DailyDevotionalPage: React.FC = () => {
   const allDates = generateDateRange(-30, 5);
   const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());
 
-
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setCurrentUser(u));
     return unsub;
@@ -88,13 +87,7 @@ const DailyDevotionalPage: React.FC = () => {
     if (!currentUser) return;
     const loadMine = async () => {
       const snap = await getDoc(
-        doc(
-          db,
-          'days',
-          selectedDate,
-          'checkboxes',
-          currentUser.uid
-        )
+        doc(db, 'days', selectedDate, 'checkboxes', currentUser.uid)
       );
       if (snap.exists()) {
         setCheckboxes(snap.data() as Checkboxes);
@@ -116,43 +109,47 @@ const DailyDevotionalPage: React.FC = () => {
         const cb = cbSnap.exists()
           ? (cbSnap.data() as Checkboxes)
           : DEFAULT_CHECKBOXES;
+        const isFitnessDay = dayData?.isFitnessDay ?? true;
         const completed =
-          cb.prayerDone && (cb.videoDone || cb.otherFitnessDone);
+          cb.prayerDone && (isFitnessDay ? (cb.videoDone || cb.otherFitnessDone) : true);
         out.push({ uid, profilePicUrl: profile.profilePicUrl, completed });
       }
       setUserStatuses(out);
     })();
-  }, [selectedDate]);
+  }, [selectedDate, dayData]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (!currentUser) {
       setCompletedDates(new Set());
       return;
     }
+
     (async () => {
       const doneSet = new Set<string>();
       for (let offset = -30; offset <= 5; offset++) {
-        const d = format(
-          addDays(new Date(selectedDate), offset),
-          'yyyy-MM-dd'
-        );
-        const snap = await getDoc(
-          doc(db, 'days', d, 'checkboxes', currentUser.uid)
-        );
-        if (snap.exists()) {
-          const cb = snap.data() as Checkboxes;
-          if (cb.prayerDone && (cb.videoDone || cb.otherFitnessDone)) {
-            doneSet.add(d);
-          }
+        const d = format(addDays(new Date(selectedDate), offset), 'yyyy-MM-dd');
+
+        const [cbSnap, daySnap] = await Promise.all([
+          getDoc(doc(db, 'days', d, 'checkboxes', currentUser.uid)),
+          getDoc(doc(db, 'days', d))
+        ]);
+
+        if (!cbSnap.exists() || !daySnap.exists()) continue;
+
+        const cb = cbSnap.data() as Checkboxes;
+        const day = daySnap.data() as DayData;
+
+        const isCompleted = cb.prayerDone && (day.isFitnessDay ? (cb.videoDone || cb.otherFitnessDone) : true);
+
+        if (isCompleted) {
+          doneSet.add(d);
         }
       }
       setCompletedDates(doneSet);
     })();
   }, [currentUser, selectedDate]);
 
-const saveCheckboxes = async (
-    partial: Partial<Checkboxes>
-  ) => {
+  const saveCheckboxes = async (partial: Partial<Checkboxes>) => {
     if (!currentUser) return;
     const updated = { ...checkboxes, ...partial };
     setCheckboxes(updated);
@@ -202,7 +199,7 @@ const saveCheckboxes = async (
           </div>
           <div>
             <iframe
-            className='video'
+              className='video'
               src={dayData.videoUrl}
               frameBorder="0"
               allow="autoplay; encrypted-media"
@@ -223,7 +220,7 @@ const saveCheckboxes = async (
               }
             />
             <h3>📝 Custom Workout</h3>
-            <br></br>
+            <br />
           </div>
           <input
             type="text"
@@ -233,8 +230,8 @@ const saveCheckboxes = async (
             onChange={(e) =>
               saveCheckboxes({ otherFitnessNote: e.target.value })
             }
-            />
-            <p>{dayData.funnyInspiration}</p>
+          />
+          <p>{dayData.funnyInspiration}</p>
           <hr />
         </>
       )}
@@ -246,6 +243,7 @@ const saveCheckboxes = async (
           <hr />
         </>
       )}
+
       <h3>💛 Lift Circle</h3>
       <div className="community-checkins">
         {userStatuses.map(({ uid, profilePicUrl, completed }) => (
