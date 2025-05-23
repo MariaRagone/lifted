@@ -25,9 +25,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { uid, displayName, photoURL, email } = user;
         const name = displayName || email?.split('@')[0] || 'User';
 
-              console.log('Saving user to Firestore:', uid, name);
-
-
         await setDoc(
           doc(db, 'users', uid),
           {
