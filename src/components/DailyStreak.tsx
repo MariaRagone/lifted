@@ -1,5 +1,6 @@
 import React from 'react';
-dimport { format, subDays } from 'date-fns';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { format, subDays } from 'date-fns';
 
 interface DailyStreakProps {
   completedDates: string[];
@@ -18,20 +19,34 @@ const DailyStreak: React.FC<DailyStreakProps> = ({ completedDates }) => {
     };
   });
 
-  return (
-    <div className="daily-streak">
-      <h3>🔥 Past 30 Days</h3>
-      <ResponsiveContainer width="100%" height={200}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis allowDecimals={false} domain={[0, 1]} />
-          <Tooltip />
-          <Line type="monotone" dataKey="completed" stroke="#82ca9d" strokeWidth={2} dot={{ r: 3 }} />
-        </LineChart>
-      </ResponsiveContainer>
+return (
+    <div className='streak-container'>
+      <h2 className='title'>📈 Daily Progress (Last 30 Days)</h2>
+      <div className='chart-container'>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey="date"
+              tickFormatter={(tick: string) => tick.slice(5)}
+              interval={4}
+              fontSize={10}
+            />
+            <YAxis allowDecimals={false} domain={[0, 1]} />
+            <Tooltip />
+            <Line
+              type="monotone"
+              dataKey="completed"
+              stroke="#00b894"
+              strokeWidth={2}
+              dot={{ r: 2 }}
+              activeDot={{ r: 5 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
-};
+}
 
 export default DailyStreak;

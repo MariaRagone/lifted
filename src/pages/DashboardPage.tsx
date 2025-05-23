@@ -58,18 +58,19 @@ export default function DashboardPage() {
     navigate('/login');
   };
 
-  return (
-    <div style={{ padding: '1rem' }}>
-      <h2>Welcome, {userName}!</h2>
-      <img className="logo" src={logo} alt="Lift & Lifted Logo" style={{ maxWidth: '200px', marginBottom: '1rem' }} />
+ 
 
-      <div>
-        <h3>Your Current Streak: {streakCount} {streakCount === 1 ? 'day' : 'days'}</h3>
+    return (
+    <div className='container'>
+      <img src={logo} alt="Lift & Lifted Logo" className='logo'/>
+      <h1 className='welcome'>Welcome, {userName}!</h1>
+      <div className='streak-box'>
+        <h2>🔥 Current Streak: {streakCount} {streakCount === 1 ? 'day' : 'days'}</h2>
       </div>
-
-        <DailyStreak completedDates={completedDates} />
-        <StreakHeatmap completedDates={completedDates} />
-      <button onClick={handleLogout} style={{ marginTop: '2rem' }}>Log Out</button>
+      <DailyStreak completedDates={completedDates} />
+<StreakHeatmap completedDates={new Set(completedDates)} />
+      <button onClick={handleLogout} className='logout-button'>Log Out</button>
     </div>
   );
 }
+

@@ -1,48 +1,51 @@
 import React from 'react';
-import CalendarHeatmap from 'react-calendar-heatmap';
-import 'react-calendar-heatmap/dist/styles.css';
-import { subDays, format } from 'date-fns';
+import { format, subDays, getDay } from 'date-fns';
+import './StreakHeatmap.css';
 
-interface StreakHeatmapProps {
-  completedDates: string[];
-}
-
-const StreakHeatmap: React.FC<StreakHeatmapProps> = ({ completedDates }) => {
-  const endDate = new Date();
-  const startDate = subDays(endDate, 180); // last 6 months
-
-  const values = Array.from({ length: 181 }).map((_, i) => {
-    const date = subDays(endDate, 180 - i);
-    const dateString = format(date, 'yyyy-MM-dd');
-
-    return {
-      date: dateString,
-      count: completedDates.includes(dateString) ? 1 : 0,
-    };
-  });
-
-  return (
-    <div style={{ marginTop: '2rem' }}>
-      <h3>📅 Activity Heatmap</h3>
-      <CalendarHeatmap
-        startDate={startDate}
-        endDate={endDate}
-        values={values}
-        classForValue={(value: { count: number; }) => {
-          if (!value || value.count === 0) {
-            return 'color-empty';
-          }
-          return `color-filled`;
-        }}
-        tooltipDataAttrs={(value: any) => {
-          return {
-            'data-tip': value.date ? `Completed on ${value.date}` : 'No activity',
-          };
-        }}
-        showWeekdayLabels
-      />
-    </div>
-  );
+type Props = {
+  completedDates: Set<string>;
 };
 
-export default StreakHeatmap;
+export default function StreakHeatmap({ completedDates }: Props) {
+  const days: { date: string; completed: boolean }[] = [];
+
+  const today = new Date();
+  for (let i = 0; i < 60; i++) {
+    const date = subDays(today, i);
+    const dateStr = format(date, 'yyyy-MM-dd');
+    days.unshift({
+      date: dateStr,
+      completed: completedDates.has(dateStr),
+    });
+  }
+
+  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  return (
+    <div className="heatmap-container">
+      <h2 className="heatmap-title">🗓️ Activity Calendar</h2>
+      <div className="heatmap-weekdays">
+        {weekdays.map((day, idx) => (
+          <div key={idx} className="heatmap-weekday">{day}</div>
+        ))}
+      </div>
+      <div className="heatmap-grid">
+        {days.map((day, idx) => (
+          <div
+            key={idx}
+            className={`heatmap-day ${day.completed ? 'completed' : ''}`}
+            title={day.date}
+          />
+        ))}
+      </div>
+      <div className="heatmap-legend">
+        <div className="heatmap-legend-item">
+          <span className="heatmap-day" /> Not Done
+        </div>
+        <div className="heatmap-legend-item">
+          <span className="heatmap-day completed" /> Done
+        </div>
+      </div>
+    </div>
+  );
+}
