@@ -9,9 +9,12 @@ import DailyDevotionalPage from './pages/DailyDevotionalPage'
 import BottomNavBar from './components/BottomNavBar'
 import NotesPage from './pages/NotesPage'
 import FavoritesPage from './pages/FavoritesPage'
+import { AuthProvider } from './contexts/AuthContext'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    <AuthProvider>
+
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
@@ -26,5 +29,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       </Routes>
       <BottomNavBar />
     </BrowserRouter>
+    </AuthProvider>
   </React.StrictMode>,
 )

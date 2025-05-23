@@ -1,12 +1,13 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from 'firebase/auth';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../library/firebase';
+import { auth, db } from '../library/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import App from '../App';
 
 interface AuthContextType {
   currentUser: User | null;
 }
-
 
 const AuthContext = createContext<AuthContextType>({ currentUser: null });
 
@@ -18,8 +19,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setCurrentUser);
-    return unsubscribe;
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setCurrentUser(user);
+      if (user) {
+        const { uid, displayName, photoURL, email } = user;
+        const name = displayName || email?.split('@')[0] || 'User';
+
+              console.log('Saving user to Firestore:', uid, name);
+
+
+        await setDoc(
+          doc(db, 'users', uid),
+          {
+            displayName: name,
+            profilePicUrl: photoURL ?? '',
+          },
+          { merge: true }
+        );
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   return (
