@@ -13,10 +13,7 @@ import ScrollingDates from '../components/ScrollingDates';
 import './DailyLift.css';
 import { generateDateRange } from '../utilities/dateHelpers';
 import { getInitials } from '../utilities/userHelpers';
-
-// Import your categorized JSON and helpers
-import rawVideos from '../data/categorizedVideos.json';
-import { getRandomVideo, Video } from '../utilities/videoHelpers';
+import WorkoutVideos from '../components/WorkoutVideos';
 
 interface DayData {
   verse: string;
@@ -54,86 +51,27 @@ const DailyLiftPage: React.FC = () => {
   const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());
   const allDates = generateDateRange(-30, 5);
 
-  // Categorized video lists
-  const [videosByCategory, setVideosByCategory] = useState<Record<string, Video[]>>({
-    '10': [],
-    '20': [],
-    '30': [],
-    '30+': [],
-  });
-  // Randomly selected embed URLs
-  const [selectedVideos, setSelectedVideos] = useState<string[]>([]);
-
-  // Auth listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setCurrentUser);
     return unsubscribe;
   }, []);
 
-  // Reset on date change
   useEffect(() => {
     setCheckboxes(DEFAULT_CHECKBOXES);
     setUserStatuses([]);
   }, [selectedDate]);
 
-  // Map your JSON into the Video[] buckets
-  useEffect(() => {
-    const byCat: Record<string, Video[]> = {
-      '10': (rawVideos['10 minutes'] || []).map(v => ({
-        videoId: v.videoId,
-        title: v.title,
-        durationMinutes: Math.ceil(v.durationSeconds / 60),
-        embedUrl: v.embedUrl,
-      })),
-      '20': (rawVideos['20 minutes'] || []).map(v => ({
-        videoId: v.videoId,
-        title: v.title,
-        durationMinutes: Math.ceil(v.durationSeconds / 60),
-        embedUrl: v.embedUrl,
-      })),
-      '30': (rawVideos['30 minutes'] || []).map(v => ({
-        videoId: v.videoId,
-        title: v.title,
-        durationMinutes: Math.ceil(v.durationSeconds / 60),
-        embedUrl: v.embedUrl,
-      })),
-      '30+': (rawVideos['30+ minutes'] || []).map(v => ({
-        videoId: v.videoId,
-        title: v.title,
-        durationMinutes: Math.ceil(v.durationSeconds / 60),
-        embedUrl: v.embedUrl,
-      })),
-    };
-    setVideosByCategory(byCat);
-  }, []);
-
-  // Load day's data
   useEffect(() => {
     (async () => {
       const snap = await getDoc(doc(db, 'days', selectedDate));
-      if (snap.exists()) {
-        setDayData(snap.data() as DayData);
-      } else {
+      if (snap.exists()) setDayData(snap.data() as DayData);
+      else {
         setDayData(null);
         console.warn('No devotional for', selectedDate);
       }
     })();
   }, [selectedDate]);
 
-  // Pick random videos on fitness days
-  useEffect(() => {
-    if (!dayData?.isFitnessDay) {
-      setSelectedVideos([]);
-      return;
-    }
-    const buckets = ['10', '20', '30', '30+'];
-    const picks = buckets
-      .map(cat => getRandomVideo(videosByCategory[cat])?.embedUrl)
-      .filter((u): u is string => !!u);
-    setSelectedVideos(picks);
-  }, [dayData, videosByCategory]);
-
-  // Load completed dates for calendar
   useEffect(() => {
     if (!currentUser) {
       setCompletedDates(new Set());
@@ -150,15 +88,13 @@ const DailyLiftPage: React.FC = () => {
         if (!cbSnap.exists() || !daySnap.exists()) continue;
         const cb = cbSnap.data() as Checkboxes;
         const day = daySnap.data() as DayData;
-        const completed =
-          cb.prayerDone && (day.isFitnessDay ? (cb.videoDone || cb.otherFitnessDone) : true);
+        const completed = cb.prayerDone && (day.isFitnessDay ? (cb.videoDone || cb.otherFitnessDone) : true);
         if (completed) doneSet.add(d);
       }
       setCompletedDates(doneSet);
     })();
   }, [currentUser, selectedDate]);
 
-  // Load community statuses
   useEffect(() => {
     if (!currentUser || !dayData) return;
     (async () => {
@@ -169,15 +105,13 @@ const DailyLiftPage: React.FC = () => {
         const profile = uDoc.data() as { profilePicUrl?: string; displayName?: string };
         const cbSnap = await getDoc(doc(db, 'days', selectedDate, 'checkboxes', uid));
         const cb = cbSnap.exists() ? (cbSnap.data() as Checkboxes) : DEFAULT_CHECKBOXES;
-        const completed =
-          cb.prayerDone && (dayData.isFitnessDay ? (cb.videoDone || cb.otherFitnessDone) : true);
+        const completed = cb.prayerDone && (dayData.isFitnessDay ? (cb.videoDone || cb.otherFitnessDone) : true);
         out.push({ uid, profilePicUrl: profile.profilePicUrl, displayName: profile.displayName, completed });
       }
       setUserStatuses(out);
     })();
   }, [currentUser, selectedDate, dayData]);
 
-  // Save checkbox state
   const saveCheckboxes = async (partial: Partial<Checkboxes>) => {
     if (!currentUser) return;
     const updated = { ...checkboxes, ...partial };
@@ -196,7 +130,6 @@ const DailyLiftPage: React.FC = () => {
         completedDates={completedDates}
       />
 
-      {/* Prayer section */}
       <div className="section-header">
         <input
           className="checkboxes"
@@ -209,7 +142,6 @@ const DailyLiftPage: React.FC = () => {
       <h4>{dayData.verse}</h4>
       <hr />
 
-      {/* Fitness Day block */}
       {dayData.isFitnessDay && (
         <>
           <div className="section-header">
@@ -222,19 +154,7 @@ const DailyLiftPage: React.FC = () => {
             <h3>🏅 Fitness Challenge</h3>
           </div>
 
-          <div className="video-carousel">
-            {selectedVideos.map((url, idx) => (
-              <iframe
-                key={idx}
-                className="video"
-                src={url}
-                frameBorder="0"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-                title={`Fitness Video ${idx + 1}`}
-              />
-            ))}
-          </div>
+          <WorkoutVideos />
           <hr />
 
           <div className="section-header">
@@ -258,7 +178,6 @@ const DailyLiftPage: React.FC = () => {
         </>
       )}
 
-      {/* Rest Day block */}
       {!dayData.isFitnessDay && (
         <>
           <h3>🧘‍♀️ Rest Day</h3>
@@ -267,7 +186,6 @@ const DailyLiftPage: React.FC = () => {
         </>
       )}
 
-      {/* Community Check-ins */}
       <h3>💛 Lift Circle</h3>
       <div className="community-checkins">
         {userStatuses.map(({ uid, profilePicUrl, displayName, completed }) => (
