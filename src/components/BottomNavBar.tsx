@@ -14,9 +14,6 @@ const BottomNavBar = () => {
       <NavLink to="/favorites" className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}>
         <FaHeart className="nav-icon" />
       </NavLink>
-      <NavLink to="/notes" className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}>
-        <FaStickyNote className="nav-icon" />
-      </NavLink>
     </nav>
   );
 };

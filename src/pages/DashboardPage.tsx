@@ -64,6 +64,7 @@ export default function DashboardPage() {
     <div className='container'>
       <img src={logo} alt="Lift & Lifted Logo" className='logo'/>
       <h1 className='welcome'>Welcome, {userName}!</h1>
+      <h2 className='announcement'>Coming soon...stats and other stuff</h2>
       <div className='streak-box'>
         <h2>🔥 Current Streak: {streakCount} {streakCount === 1 ? 'day' : 'days'}</h2>
       </div>
