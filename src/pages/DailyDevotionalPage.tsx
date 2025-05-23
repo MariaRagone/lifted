@@ -8,16 +8,18 @@ import {
   getDocs,
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, addDays } from 'date-fns';
 import { db, auth } from '../library/firebase';
 import ScrollingDates from '../components/ScrollingDates';
 import logo from '../assets/daily-lift-logo.png';
 import './DailyDevotional.css';
-import { generateLastNDates, generateDateRange } from '../utilities/dateHelpers'
+import { generateDateRange } from '../utilities/dateHelpers'
+
 interface DayData {
   verse: string;
   videoUrl?: string;
   isFitnessDay: boolean;
+  funnyInspiration: string;
 }
 
 interface Checkboxes {
@@ -53,10 +55,10 @@ const DailyDevotionalPage: React.FC = () => {
   const [checkboxes, setCheckboxes] = useState<Checkboxes>(
     DEFAULT_CHECKBOXES
   );
-  const [note, setNote] = useState<string>('');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userStatuses, setUserStatuses] = useState<UserStatus[]>([]);
   const allDates = generateDateRange(-30, 5);
+  const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());
 
 
   useEffect(() => {
@@ -66,7 +68,6 @@ const DailyDevotionalPage: React.FC = () => {
 
   useEffect(() => {
     setCheckboxes(DEFAULT_CHECKBOXES);
-    setNote('');
     setUserStatuses([]);
   }, [selectedDate]);
 
@@ -103,61 +104,61 @@ const DailyDevotionalPage: React.FC = () => {
   }, [currentUser, selectedDate]);
 
   useEffect(() => {
-    const loadAll = async () => {
+    ;(async () => {
       const usersSnap = await getDocs(collection(db, 'users'));
       const out: UserStatus[] = [];
-
       for (const uDoc of usersSnap.docs) {
         const uid = uDoc.id;
-        const profile = uDoc.data() as UserProfile;
+        const profile = uDoc.data() as { profilePicUrl?: string };
         const cbSnap = await getDoc(
           doc(db, 'days', selectedDate, 'checkboxes', uid)
         );
-        const data = cbSnap.exists()
+        const cb = cbSnap.exists()
           ? (cbSnap.data() as Checkboxes)
           : DEFAULT_CHECKBOXES;
         const completed =
-          data.prayerDone &&
-          (data.videoDone || data.otherFitnessDone);
+          cb.prayerDone && (cb.videoDone || cb.otherFitnessDone);
         out.push({ uid, profilePicUrl: profile.profilePicUrl, completed });
       }
       setUserStatuses(out);
-    };
-    loadAll();
+    })();
   }, [selectedDate]);
 
-  const saveCheckboxes = async (
+   useEffect(() => {
+    if (!currentUser) {
+      setCompletedDates(new Set());
+      return;
+    }
+    (async () => {
+      const doneSet = new Set<string>();
+      for (let offset = -30; offset <= 5; offset++) {
+        const d = format(
+          addDays(new Date(selectedDate), offset),
+          'yyyy-MM-dd'
+        );
+        const snap = await getDoc(
+          doc(db, 'days', d, 'checkboxes', currentUser.uid)
+        );
+        if (snap.exists()) {
+          const cb = snap.data() as Checkboxes;
+          if (cb.prayerDone && (cb.videoDone || cb.otherFitnessDone)) {
+            doneSet.add(d);
+          }
+        }
+      }
+      setCompletedDates(doneSet);
+    })();
+  }, [currentUser, selectedDate]);
+
+const saveCheckboxes = async (
     partial: Partial<Checkboxes>
   ) => {
     if (!currentUser) return;
-    const ref = doc(
-      db,
-      'days',
-      selectedDate,
-      'checkboxes',
-      currentUser.uid
-    );
     const updated = { ...checkboxes, ...partial };
     setCheckboxes(updated);
-    await setDoc(ref, updated, { merge: true });
-  };
-
-  const saveNote = async (
-    e: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    const text = e.target.value;
-    setNote(text);
-    if (!currentUser) return;
-    const ref = doc(
-      db,
-      'users',
-      currentUser.uid,
-      'dailyNotes',
-      selectedDate
-    );
     await setDoc(
-      ref,
-      { text, timestamp: new Date().toISOString() },
+      doc(db, 'days', selectedDate, 'checkboxes', currentUser.uid),
+      updated,
       { merge: true }
     );
   };
@@ -173,6 +174,7 @@ const DailyDevotionalPage: React.FC = () => {
         dates={allDates}
         selectedDate={selectedDate}
         onSelectDate={setSelectedDate}
+        completedDates={completedDates}
       />
 
       <div className="section-header">
@@ -184,7 +186,7 @@ const DailyDevotionalPage: React.FC = () => {
         />
         <h3>🙏 Prayer</h3>
       </div>
-      <p>{dayData.verse}</p>
+      <h4>{dayData.verse}</h4>
       <hr />
 
       {dayData.isFitnessDay && dayData.videoUrl && (
@@ -198,8 +200,9 @@ const DailyDevotionalPage: React.FC = () => {
             />
             <h3>🏅 Fitness Challenge</h3>
           </div>
-          <div className="video-wrap">
+          <div>
             <iframe
+            className='video'
               src={dayData.videoUrl}
               frameBorder="0"
               allow="autoplay; encrypted-media"
@@ -220,6 +223,7 @@ const DailyDevotionalPage: React.FC = () => {
               }
             />
             <h3>📝 Custom Workout</h3>
+            <br></br>
           </div>
           <input
             type="text"
@@ -229,7 +233,8 @@ const DailyDevotionalPage: React.FC = () => {
             onChange={(e) =>
               saveCheckboxes({ otherFitnessNote: e.target.value })
             }
-          />
+            />
+            <p>{dayData.funnyInspiration}</p>
           <hr />
         </>
       )}
