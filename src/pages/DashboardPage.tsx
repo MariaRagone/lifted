@@ -4,10 +4,10 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../library/firebase';
 import { useNavigate } from 'react-router-dom';
 import { format, subDays } from 'date-fns';
-import logo from '../assets/daily-lift-logo.png';
 import DailyStreak from '../components/DailyStreak';
 import { calculateStreak } from '../utilities/dailyStreakHelpers';
 import StreakHeatmap from '../components/StreakHeatmap';
+import Devotional from '../components/Devotional';
 
 
 export default function DashboardPage() {
@@ -62,12 +62,13 @@ export default function DashboardPage() {
 
     return (
     <div className='container'>
-      <img src={logo} alt="Lift & Lifted Logo" className='logo'/>
+      <img src='assets/daily-lift-logo.png' alt="Lift & Lifted Logo" className='logo'/>
       <h1 className='welcome'>Welcome, {userName}!</h1>
       <h2 className='announcement'>Coming soon...stats and other stuff</h2>
       <div className='streak-box'>
         <h2>🔥 Current Streak: {streakCount} {streakCount === 1 ? 'day' : 'days'}</h2>
       </div>
+      {/* <WorkoutVideos /> */}
       <DailyStreak completedDates={completedDates} />
 <StreakHeatmap completedDates={new Set(completedDates)} />
       <button onClick={handleLogout} className='logout-button'>Log Out</button>
