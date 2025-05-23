@@ -14,6 +14,7 @@ import './DailyLift.css';
 import { generateDateRange } from '../utilities/dateHelpers';
 import { getInitials } from '../utilities/userHelpers';
 import WorkoutVideos from '../components/WorkoutVideos';
+import Devotional from '../components/Devotional';
 
 interface DayData {
   verse: string;
@@ -139,9 +140,7 @@ const DailyLiftPage: React.FC = () => {
         />
         <h3>🙏 Prayer</h3>
       </div>
-      <h4>{dayData.verse}</h4>
-      <hr />
-
+      <Devotional />
       {dayData.isFitnessDay && (
         <>
           <div className="section-header">
@@ -156,7 +155,6 @@ const DailyLiftPage: React.FC = () => {
 
           <WorkoutVideos />
           <hr />
-
           <div className="section-header">
             <input
               className="checkboxes"
