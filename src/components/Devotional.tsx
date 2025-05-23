@@ -4,20 +4,23 @@ import devos from '../data/daily-lift-devotionals.json';
 
 interface DevotionalEntry {
   id: number;
-  date: string; // 'YYYY-MM-DD'
+  date: string;
   verse: string;
   devotional: string;
   reflection: string;
 }
 
-const DailyDevotional: React.FC = () => {
+interface Props {
+  selectedDate: string; // expected format: 'YYYY-MM-DD'
+}
+
+const DailyDevotional: React.FC<Props> = ({ selectedDate }) => {
   const [todayDevo, setTodayDevo] = useState<DevotionalEntry | null>(null);
 
   useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10); // e.g., '2025-05-23'
-    const match = (devos as DevotionalEntry[]).find((d) => d.date === today);
+    const match = devos.find((d) => d.date === selectedDate);
     setTodayDevo(match || null);
-  }, []);
+  }, [selectedDate]);
 
   return (
     <div className="devotional-section">
@@ -31,7 +34,7 @@ const DailyDevotional: React.FC = () => {
           </div>
         </>
       ) : (
-        <p className="devotional-text">No devotional found for today.</p>
+        <p className="devotional-text">No devotional found for {selectedDate}.</p>
       )}
     </div>
   );

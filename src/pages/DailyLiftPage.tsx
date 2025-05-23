@@ -140,7 +140,7 @@ const DailyLiftPage: React.FC = () => {
         />
         <h3>🙏 Prayer</h3>
       </div>
-      <Devotional />
+<Devotional selectedDate={selectedDate} />
       {dayData.isFitnessDay && (
         <>
           <div className="section-header">
