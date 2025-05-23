@@ -15,6 +15,7 @@ import { generateDateRange } from '../utilities/dateHelpers';
 import { getInitials } from '../utilities/userHelpers';
 import WorkoutVideos from '../components/WorkoutVideos';
 import Devotional from '../components/Devotional';
+import Logo from '../components/Logo';
 
 interface DayData {
   verse: string;
@@ -123,7 +124,9 @@ const DailyLiftPage: React.FC = () => {
   if (!dayData) return <div style={{ padding: '1rem' }}>Loading…</div>;
 
   return (
+    <>
     <div className="daily-page">
+      <Logo size={200} />
       <ScrollingDates
         dates={allDates}
         selectedDate={selectedDate}
@@ -201,6 +204,7 @@ const DailyLiftPage: React.FC = () => {
         Lift up your friends in prayer and encourage them to do their daily lift!
       </p>
     </div>
+        </>
   );
 };
 

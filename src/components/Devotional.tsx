@@ -24,7 +24,6 @@ const DailyDevotional: React.FC<Props> = ({ selectedDate }) => {
 
   return (
     <div className="devotional-section">
-      <h2>Today's Devotional</h2>
       {todayDevo ? (
         <>
           <div className="devotional-verse">📖 {todayDevo.verse}</div>

@@ -1,5 +1,4 @@
-.page {
-  max-height: 500px;
+.daily-page {
   padding: 5px;
 }
 
@@ -108,9 +107,6 @@
   text-transform: uppercase;
 }
 
-.logo {
-  width: 150px;
-}
 
 .checkmark {
   padding-left: 8px;

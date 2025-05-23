@@ -8,6 +8,7 @@ import DailyStreak from '../components/DailyStreak';
 import { calculateStreak } from '../utilities/dailyStreakHelpers';
 import StreakHeatmap from '../components/StreakHeatmap';
 import Devotional from '../components/Devotional';
+import Logo from '../components/Logo';
 
 
 export default function DashboardPage() {
@@ -62,15 +63,14 @@ export default function DashboardPage() {
 
     return (
     <div className='container'>
-      <img src='assets/daily-lift-logo.png' alt="Lift & Lifted Logo" className='logo'/>
+      <Logo size={200}/>
       <h1 className='welcome'>Welcome, {userName}!</h1>
       <h2 className='announcement'>Coming soon...stats and other stuff</h2>
       <div className='streak-box'>
         <h2>🔥 Current Streak: {streakCount} {streakCount === 1 ? 'day' : 'days'}</h2>
       </div>
-      {/* <WorkoutVideos /> */}
-      <DailyStreak completedDates={completedDates} />
-<StreakHeatmap completedDates={new Set(completedDates)} />
+      {/* <DailyStreak completedDates={completedDates} /> */}
+      {/* <StreakHeatmap completedDates={new Set(completedDates)} /> */}
       <button onClick={handleLogout} className='logout-button'>Log Out</button>
     </div>
   );
