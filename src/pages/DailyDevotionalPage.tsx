@@ -1,10 +1,19 @@
-import { useEffect, useState } from 'react';
-import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
-import { db, auth } from '../library/firebase';
+// src/pages/DailyDevotionalPage.tsx
+import React, { useEffect, useState } from 'react';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  getDocs,
+} from 'firebase/firestore';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { format, parseISO } from 'date-fns';
-import { onAuthStateChanged } from 'firebase/auth';
+import { db, auth } from '../library/firebase';
+import ScrollingDates from '../components/ScrollingDates';
+import logo from '../assets/daily-lift-logo.png';
 import './DailyDevotional.css';
-
+import { generateLastNDates, generateDateRange } from '../utilities/dateHelpers'
 interface DayData {
   verse: string;
   videoUrl?: string;
@@ -20,128 +29,158 @@ interface Checkboxes {
 
 interface UserProfile {
   displayName: string;
-  profilePicUrl: string;
-  uid: string;
+  profilePicUrl?: string;
 }
 
-const DailyDevotionalPage = () => {
-   const [note, setNote] = useState('');
-  const [dayData, setDayData] = useState<DayData | null>(null);
-  const [checkboxes, setCheckboxes] = useState<Checkboxes>({
-    prayerDone: false,
-    videoDone: false,
-    otherFitnessDone: false,
-    otherFitnessNote: '',
-  });
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [userStatuses, setUserStatuses] = useState<
-    { profile: UserProfile; completed: boolean }[]
-  >([]);
+interface UserStatus {
+  uid: string;
+  profilePicUrl?: string;
+  completed: boolean;
+}
 
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
+const DEFAULT_CHECKBOXES: Checkboxes = {
+  prayerDone: false,
+  videoDone: false,
+  otherFitnessDone: false,
+  otherFitnessNote: '',
+};
+
+const DailyDevotionalPage: React.FC = () => {
+  const [selectedDate, setSelectedDate] = useState(
+    format(new Date(), 'yyyy-MM-dd')
+  );
+  const [dayData, setDayData] = useState<DayData | null>(null);
+  const [checkboxes, setCheckboxes] = useState<Checkboxes>(
+    DEFAULT_CHECKBOXES
+  );
+  const [note, setNote] = useState<string>('');
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userStatuses, setUserStatuses] = useState<UserStatus[]>([]);
+  const allDates = generateDateRange(-30, 5);
+
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      setCurrentUser(user);
-    });
-    return () => unsubscribe();
+    const unsub = onAuthStateChanged(auth, (u) => setCurrentUser(u));
+    return unsub;
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const docRef = doc(db, 'days', todayStr);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setDayData(docSnap.data() as DayData);
-      }
-    };
-    fetchData();
-  }, [todayStr]);
+    setCheckboxes(DEFAULT_CHECKBOXES);
+    setNote('');
+    setUserStatuses([]);
+  }, [selectedDate]);
 
   useEffect(() => {
-    const loadCheckboxes = async () => {
-      if (!currentUser) return;
-      const ref = doc(db, 'days', todayStr, 'checkboxes', currentUser.uid);
-      const snap = await getDoc(ref);
+    const load = async () => {
+      const snap = await getDoc(doc(db, 'days', selectedDate));
+      if (snap.exists()) {
+        setDayData(snap.data() as DayData);
+      } else {
+        setDayData(null);
+        console.warn('No devotional for', selectedDate);
+      }
+    };
+    load();
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const loadMine = async () => {
+      const snap = await getDoc(
+        doc(
+          db,
+          'days',
+          selectedDate,
+          'checkboxes',
+          currentUser.uid
+        )
+      );
       if (snap.exists()) {
         setCheckboxes(snap.data() as Checkboxes);
       }
     };
-    loadCheckboxes();
-  }, [currentUser, todayStr]);
+    loadMine();
+  }, [currentUser, selectedDate]);
 
-  const saveToFirestore = async (updated: Partial<Checkboxes>) => {
-    if (!currentUser) return;
-    const ref = doc(db, 'days', todayStr, 'checkboxes', currentUser.uid);
-    await setDoc(ref, { ...checkboxes, ...updated }, { merge: true });
-  };
-
-  const handleToggle = (key: keyof Checkboxes) => {
-    const updated = { ...checkboxes, [key]: !checkboxes[key] };
-    setCheckboxes(updated);
-    saveToFirestore(updated);
-  };
-
-  const handleOtherFitnessNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const note = e.target.value;
-    const updated = { ...checkboxes, otherFitnessNote: note };
-    setCheckboxes(updated);
-    saveToFirestore({ otherFitnessNote: note });
-  };
-
-  // 🟢 Load and display user statuses
   useEffect(() => {
-    const fetchStatuses = async () => {
+    const loadAll = async () => {
       const usersSnap = await getDocs(collection(db, 'users'));
-      const result: { profile: UserProfile; completed: boolean }[] = [];
+      const out: UserStatus[] = [];
 
-      for (const userDoc of usersSnap.docs) {
-        const profile = userDoc.data() as UserProfile;
-        const userId = userDoc.id;
-
-        const checkboxSnap = await getDoc(
-          doc(db, 'days', todayStr, 'checkboxes', userId)
+      for (const uDoc of usersSnap.docs) {
+        const uid = uDoc.id;
+        const profile = uDoc.data() as UserProfile;
+        const cbSnap = await getDoc(
+          doc(db, 'days', selectedDate, 'checkboxes', uid)
         );
-
-        if (checkboxSnap.exists()) {
-          const check = checkboxSnap.data() as Checkboxes;
-          const completed =
-            check.prayerDone && (check.videoDone || check.otherFitnessDone);
-
-          result.push({ profile: { ...profile, uid: userId }, completed });
-        } else {
-          result.push({ profile: { ...profile, uid: userId }, completed: false });
-        }
+        const data = cbSnap.exists()
+          ? (cbSnap.data() as Checkboxes)
+          : DEFAULT_CHECKBOXES;
+        const completed =
+          data.prayerDone &&
+          (data.videoDone || data.otherFitnessDone);
+        out.push({ uid, profilePicUrl: profile.profilePicUrl, completed });
       }
-
-      setUserStatuses(result);
+      setUserStatuses(out);
     };
+    loadAll();
+  }, [selectedDate]);
 
-    fetchStatuses();
-  }, [todayStr]);
+  const saveCheckboxes = async (
+    partial: Partial<Checkboxes>
+  ) => {
+    if (!currentUser) return;
+    const ref = doc(
+      db,
+      'days',
+      selectedDate,
+      'checkboxes',
+      currentUser.uid
+    );
+    const updated = { ...checkboxes, ...partial };
+    setCheckboxes(updated);
+    await setDoc(ref, updated, { merge: true });
+  };
 
-  if (!dayData) return <div>Loading...</div>;
+  const saveNote = async (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const text = e.target.value;
+    setNote(text);
+    if (!currentUser) return;
+    const ref = doc(
+      db,
+      'users',
+      currentUser.uid,
+      'dailyNotes',
+      selectedDate
+    );
+    await setDoc(
+      ref,
+      { text, timestamp: new Date().toISOString() },
+      { merge: true }
+    );
+  };
 
-  const handleNoteChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-  const noteText = e.target.value;
-  setNote(noteText);
-
-  if (!currentUser) return;
-
-  const ref = doc(db, "users", currentUser.uid, "dailyNotes", todayStr);
-  await setDoc(ref, { text: noteText, timestamp: new Date() }, { merge: true });
-};
+  if (!dayData)
+    return <div style={{ padding: '1rem' }}>Loading…</div>;
 
   return (
-    <div className='page'>
-      <h2>Daily Lift for {format(parseISO(todayStr), 'MMMM d')}</h2>
+    <div className="daily-page">
+      <img className="logo" src={logo} alt="Daily Lift" />
+
+      <ScrollingDates
+        dates={allDates}
+        selectedDate={selectedDate}
+        onSelectDate={setSelectedDate}
+      />
 
       <div className="section-header">
         <input
+          className='checkboxes'
           type="checkbox"
-          className="themed-checkbox"
           checked={checkboxes.prayerDone}
-          onChange={() => handleToggle('prayerDone')}
+          onChange={() => saveCheckboxes({ prayerDone: !checkboxes.prayerDone })}
         />
         <h3>🙏 Prayer</h3>
       </div>
@@ -152,87 +191,72 @@ const DailyDevotionalPage = () => {
         <>
           <div className="section-header">
             <input
+              className='checkboxes'
               type="checkbox"
-              className="themed-checkbox"
               checked={checkboxes.videoDone}
-              onChange={() => handleToggle('videoDone')}
+              onChange={() => saveCheckboxes({ videoDone: !checkboxes.videoDone })}
             />
             <h3>🏅 Fitness Challenge</h3>
           </div>
-
-          <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
+          <div className="video-wrap">
             <iframe
               src={dayData.videoUrl}
               frameBorder="0"
-              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+              allow="autoplay; encrypted-media"
               allowFullScreen
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-              }}
-            ></iframe>
+            />
           </div>
           <hr />
 
           <div className="section-header">
             <input
+              className='checkboxes'
               type="checkbox"
-              className="themed-checkbox"
               checked={checkboxes.otherFitnessDone}
-              onChange={() => handleToggle('otherFitnessDone')}
+              onChange={() =>
+                saveCheckboxes({
+                  otherFitnessDone: !checkboxes.otherFitnessDone,
+                })
+              }
             />
             <h3>📝 Custom Workout</h3>
           </div>
           <input
             type="text"
+            className="input"
             placeholder="🏃 Custom workout..."
             value={checkboxes.otherFitnessNote}
-            onChange={handleOtherFitnessNoteChange}
-            className="input"
+            onChange={(e) =>
+              saveCheckboxes({ otherFitnessNote: e.target.value })
+            }
           />
           <hr />
         </>
       )}
 
-        <h3>📝 Notes</h3>
-        <textarea
-          className="input"
-          placeholder="Private notes go here!"
-          value={note}
-          onChange={handleNoteChange}
-          rows={3}
-/>
-
       {!dayData.isFitnessDay && (
         <>
           <h3>🧘‍♀️ Rest Day</h3>
-          <p>Use today to reflect, stretch, or rest. You’ve earned it!</p>
+          <p>Use today to reflect, stretch, or rest—you’ve earned it!</p>
           <hr />
         </>
       )}
-
-<div className="community-checkins">
-  {userStatuses.map(({ profile, completed }) => (
-    <div key={profile.uid} className="user-checkin">
-      {profile.profilePicUrl ? (
-  <img src={profile.profilePicUrl} alt={profile.displayName} />
-) : (
-  <div className="avatar-fallback">
-    {profile.displayName?.charAt(0).toUpperCase() || "?"}
-  </div>
-)}
-      <div>
-        {completed ? '✅' : '❌'}
+      <h3>💛 Lift Circle</h3>
+      <div className="community-checkins">
+        {userStatuses.map(({ uid, profilePicUrl, completed }) => (
+          <div key={uid} className="user-checkin">
+            {profilePicUrl ? (
+              <img src={profilePicUrl} alt="" />
+            ) : (
+              <div className="avatar-fallback">?</div>
+            )}
+            {completed && <span className="checkmark">✓</span>}
+          </div>
+        ))}
       </div>
-    </div>
-  ))}
-
-
-        <p style={{textAlign: 'center', color: '#f1a84d', paddingBottom: '30px', }}>Lift up your friends in prayer and encourage them to do their daily lift!</p>
-      </div>
+      <p className="encourage">
+        Lift up your friends in prayer and encourage them to do their daily lift!
+      </p>
     </div>
   );
 };
