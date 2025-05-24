@@ -62,6 +62,17 @@ const DailyLiftPage: React.FC = () => {
     setCheckboxes(DEFAULT_CHECKBOXES);
     setUserStatuses([]);
   }, [selectedDate]);
+
+  useEffect(() => {
+  if (!currentUser) return;
+
+  (async () => {
+    const cbSnap = await getDoc(doc(db, 'days', selectedDate, 'checkboxes', currentUser.uid));
+    if (cbSnap.exists()) {
+      setCheckboxes(cbSnap.data() as Checkboxes);
+    }
+  })();
+}, [currentUser, selectedDate]);
   
   useEffect(() => {
     if (!currentUser) {
@@ -99,12 +110,17 @@ const DailyLiftPage: React.FC = () => {
     })();
   }, [currentUser, selectedDate]);
   
-  const saveCheckboxes = async (partial: Partial<Checkboxes>) => {
-    if (!currentUser) return;
-    const updated = { ...checkboxes, ...partial };
-    setCheckboxes(updated);
-    await setDoc(doc(db, 'days', selectedDate, 'checkboxes', currentUser.uid), updated, { merge: true });
-  };
+ const saveCheckboxes = async (partial: Partial<Checkboxes>) => {
+  if (!currentUser) return;
+  const updated = { ...checkboxes, ...partial };
+  setCheckboxes(updated);
+
+  await setDoc(
+    doc(db, 'days', selectedDate, 'checkboxes', currentUser.uid),
+    updated,
+    { merge: true }
+  );
+};
   
   return (
     <div className="daily-page">
