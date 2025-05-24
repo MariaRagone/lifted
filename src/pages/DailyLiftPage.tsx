@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  doc,
-  getDoc,
-  setDoc,
-  collection,
-  getDocs,
-} from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, getDocs,} from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { format, addDays } from 'date-fns';
 import { db, auth } from '../library/firebase';
@@ -56,19 +50,19 @@ const DailyLiftPage: React.FC = () => {
   const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());
   const allDates = generateDateRange(-30, 5);
   const showFitness = isFitnessDay(selectedDate);
-const todayDevo = devos.find((d) => d.date === selectedDate) as DevotionalEntry | undefined;
-
-
+  const todayDevo = devos.find((d) => d.date === selectedDate) as DevotionalEntry | undefined;
+  
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setCurrentUser);
     return unsubscribe;
   }, []);
-
+  
   useEffect(() => {
     setCheckboxes(DEFAULT_CHECKBOXES);
     setUserStatuses([]);
   }, [selectedDate]);
-
+  
   useEffect(() => {
     if (!currentUser) {
       setCompletedDates(new Set());
@@ -87,7 +81,7 @@ const todayDevo = devos.find((d) => d.date === selectedDate) as DevotionalEntry 
       setCompletedDates(doneSet);
     })();
   }, [currentUser, selectedDate]);
-
+  
   useEffect(() => {
     if (!currentUser) return;
     (async () => {
@@ -104,14 +98,14 @@ const todayDevo = devos.find((d) => d.date === selectedDate) as DevotionalEntry 
       setUserStatuses(out);
     })();
   }, [currentUser, selectedDate]);
-
+  
   const saveCheckboxes = async (partial: Partial<Checkboxes>) => {
     if (!currentUser) return;
     const updated = { ...checkboxes, ...partial };
     setCheckboxes(updated);
     await setDoc(doc(db, 'days', selectedDate, 'checkboxes', currentUser.uid), updated, { merge: true });
   };
-
+  
   return (
     <div className="daily-page">
       <Logo size={200} />
@@ -145,8 +139,9 @@ const todayDevo = devos.find((d) => d.date === selectedDate) as DevotionalEntry 
             />
             <h3 >🏅 Fitness Challenge</h3>
           </div>
+<WorkoutVideos selectedDate={selectedDate} />
 
-          <WorkoutVideos />
+          {/* <WorkoutVideos /> */}
           <hr />
 
           <div className="section-header">
