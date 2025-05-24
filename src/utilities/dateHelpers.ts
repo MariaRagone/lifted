@@ -1,6 +1,5 @@
 import { format, subDays, addDays } from 'date-fns';
 
-
 export function generateLastNDates(count: number): string[] {
   const today = new Date();
   const dates: string[] = [];
@@ -10,7 +9,6 @@ export function generateLastNDates(count: number): string[] {
   }
   return dates;
 }
-
 
 export function generateDateRange(
   startOffset: number,
@@ -26,3 +24,9 @@ export function generateDateRange(
   return dates;
 }
 
+export function isFitnessDay(date: string): boolean {
+  const parsedDate = new Date(date);
+  const dayOfWeek = parsedDate.getDay(); // 0 = Sunday, 6 = Saturday
+
+  return dayOfWeek === 0 || dayOfWeek === 2 || dayOfWeek === 4;
+}

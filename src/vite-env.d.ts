@@ -5,6 +5,6 @@ declare module '*.png' {
   export default value;
 }
 declare module '*.jpg' {
-  const value: string;
+  const val: string;
   export default value;
 }

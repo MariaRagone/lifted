@@ -8,10 +8,11 @@ interface DevotionalEntry {
   verse: string;
   devotional: string;
   reflection: string;
+  funnyInspiration?: string;
 }
 
 interface Props {
-  selectedDate: string; // expected format: 'YYYY-MM-DD'
+  selectedDate: string; 
 }
 
 const DailyDevotional: React.FC<Props> = ({ selectedDate }) => {

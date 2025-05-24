@@ -8,7 +8,7 @@ export interface Video {
 export type RawVideo = {
   videoId: string;
   title: string;
-  publishedAt: string;         // you have this too, but we don't use it in categorize
+  publishedAt: string;         
   durationSeconds: number;
   embedUrl: string;
 };

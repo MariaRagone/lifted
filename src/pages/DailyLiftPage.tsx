@@ -11,16 +11,20 @@ import { format, addDays } from 'date-fns';
 import { db, auth } from '../library/firebase';
 import ScrollingDates from '../components/ScrollingDates';
 import './DailyLift.css';
-import { generateDateRange } from '../utilities/dateHelpers';
+import { generateDateRange, isFitnessDay } from '../utilities/dateHelpers';
 import { getInitials } from '../utilities/userHelpers';
 import WorkoutVideos from '../components/WorkoutVideos';
 import Devotional from '../components/Devotional';
 import Logo from '../components/Logo';
+import devos from '../data/daily-lift-devotionals.json';
 
-interface DayData {
+interface DevotionalEntry {
+  id: number;
+  date: string;
   verse: string;
-  isFitnessDay: boolean;
-  funnyInspiration: string;
+  devotional: string;
+  reflection: string;
+  funnyInspiration?: string; 
 }
 
 interface Checkboxes {
@@ -46,12 +50,14 @@ const DEFAULT_CHECKBOXES: Checkboxes = {
 
 const DailyLiftPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [dayData, setDayData] = useState<DayData | null>(null);
   const [checkboxes, setCheckboxes] = useState<Checkboxes>(DEFAULT_CHECKBOXES);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userStatuses, setUserStatuses] = useState<UserStatus[]>([]);
   const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());
   const allDates = generateDateRange(-30, 5);
+  const showFitness = isFitnessDay(selectedDate);
+const todayDevo = devos.find((d) => d.date === selectedDate) as DevotionalEntry | undefined;
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setCurrentUser);
@@ -64,17 +70,6 @@ const DailyLiftPage: React.FC = () => {
   }, [selectedDate]);
 
   useEffect(() => {
-    (async () => {
-      const snap = await getDoc(doc(db, 'days', selectedDate));
-      if (snap.exists()) setDayData(snap.data() as DayData);
-      else {
-        setDayData(null);
-        console.warn('No devotional for', selectedDate);
-      }
-    })();
-  }, [selectedDate]);
-
-  useEffect(() => {
     if (!currentUser) {
       setCompletedDates(new Set());
       return;
@@ -83,14 +78,10 @@ const DailyLiftPage: React.FC = () => {
       const doneSet = new Set<string>();
       for (let offset = -30; offset <= 5; offset++) {
         const d = format(addDays(new Date(selectedDate), offset), 'yyyy-MM-dd');
-        const [cbSnap, daySnap] = await Promise.all([
-          getDoc(doc(db, 'days', d, 'checkboxes', currentUser.uid)),
-          getDoc(doc(db, 'days', d)),
-        ]);
-        if (!cbSnap.exists() || !daySnap.exists()) continue;
+        const cbSnap = await getDoc(doc(db, 'days', d, 'checkboxes', currentUser.uid));
+        if (!cbSnap.exists()) continue;
         const cb = cbSnap.data() as Checkboxes;
-        const day = daySnap.data() as DayData;
-        const completed = cb.prayerDone && (day.isFitnessDay ? (cb.videoDone || cb.otherFitnessDone) : true);
+        const completed = cb.prayerDone && (isFitnessDay(d) ? (cb.videoDone || cb.otherFitnessDone) : true);
         if (completed) doneSet.add(d);
       }
       setCompletedDates(doneSet);
@@ -98,7 +89,7 @@ const DailyLiftPage: React.FC = () => {
   }, [currentUser, selectedDate]);
 
   useEffect(() => {
-    if (!currentUser || !dayData) return;
+    if (!currentUser) return;
     (async () => {
       const usersSnap = await getDocs(collection(db, 'users'));
       const out: UserStatus[] = [];
@@ -107,12 +98,12 @@ const DailyLiftPage: React.FC = () => {
         const profile = uDoc.data() as { profilePicUrl?: string; displayName?: string };
         const cbSnap = await getDoc(doc(db, 'days', selectedDate, 'checkboxes', uid));
         const cb = cbSnap.exists() ? (cbSnap.data() as Checkboxes) : DEFAULT_CHECKBOXES;
-        const completed = cb.prayerDone && (dayData.isFitnessDay ? (cb.videoDone || cb.otherFitnessDone) : true);
+        const completed = cb.prayerDone && (showFitness ? (cb.videoDone || cb.otherFitnessDone) : true);
         out.push({ uid, profilePicUrl: profile.profilePicUrl, displayName: profile.displayName, completed });
       }
       setUserStatuses(out);
     })();
-  }, [currentUser, selectedDate, dayData]);
+  }, [currentUser, selectedDate]);
 
   const saveCheckboxes = async (partial: Partial<Checkboxes>) => {
     if (!currentUser) return;
@@ -121,10 +112,7 @@ const DailyLiftPage: React.FC = () => {
     await setDoc(doc(db, 'days', selectedDate, 'checkboxes', currentUser.uid), updated, { merge: true });
   };
 
-  if (!dayData) return <div style={{ padding: '1rem' }}>Loading…</div>;
-
   return (
-    <>
     <div className="daily-page">
       <Logo size={200} />
       <ScrollingDates
@@ -143,21 +131,24 @@ const DailyLiftPage: React.FC = () => {
         />
         <h3>🙏 Prayer</h3>
       </div>
-<Devotional selectedDate={selectedDate} />
-      {dayData.isFitnessDay && (
+
+      <Devotional selectedDate={selectedDate} />
+
+      {showFitness && (
         <>
-          <div className="section-header">
+          <div className="section-header" style={{marginBottom: '-20px' }}>
             <input
               className="checkboxes"
               type="checkbox"
               checked={checkboxes.videoDone}
               onChange={() => saveCheckboxes({ videoDone: !checkboxes.videoDone })}
             />
-            <h3>🏅 Fitness Challenge</h3>
+            <h3 >🏅 Fitness Challenge</h3>
           </div>
 
           <WorkoutVideos />
           <hr />
+
           <div className="section-header">
             <input
               className="checkboxes"
@@ -167,6 +158,7 @@ const DailyLiftPage: React.FC = () => {
             />
             <h3>📝 Custom Workout</h3>
           </div>
+
           <input
             type="text"
             className="input"
@@ -174,12 +166,17 @@ const DailyLiftPage: React.FC = () => {
             value={checkboxes.otherFitnessNote || ''}
             onChange={(e) => saveCheckboxes({ otherFitnessNote: e.target.value })}
           />
-          <p>{dayData.funnyInspiration}</p>
-          <hr />
+            {todayDevo?.funnyInspiration && (
+              <div className="funny-inspiration-card">
+                <p className="funny-inspiration-emoji">😄</p>
+                <p className="funny-inspiration-text">{todayDevo.funnyInspiration}</p>
+              </div>
+)}
+         <hr />
         </>
       )}
 
-      {!dayData.isFitnessDay && (
+      {!showFitness && (
         <>
           <h3>🧘‍♀️ Rest Day</h3>
           <p>Use today to reflect, stretch, or rest—you’ve earned it!</p>
@@ -204,7 +201,6 @@ const DailyLiftPage: React.FC = () => {
         Lift up your friends in prayer and encourage them to do their daily lift!
       </p>
     </div>
-        </>
   );
 };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../assets/daily-lift-logo.png'; // Adjust path if needed
+import logo from '../assets/daily-lift-logo.png'; 
 import './Logo.css';
 
 const Logo: React.FC<{ size?: number }> = ({ size = 120 }) => {
