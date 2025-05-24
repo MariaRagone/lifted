@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../library/firebase';
 import { useNavigate } from 'react-router-dom';
@@ -9,51 +9,38 @@ import { calculateStreak } from '../utilities/dailyStreakHelpers';
 import StreakHeatmap from '../components/StreakHeatmap';
 import Devotional from '../components/Devotional';
 import Logo from '../components/Logo';
+import GroupSelector from '../components/GroupSelector'; 
 
 
 export default function DashboardPage() {
   const [userName, setUserName] = useState('');
   const [completedDates, setCompletedDates] = useState<string[]>([]);
   const [streakCount, setStreakCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userGroupId, setUserGroupId] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
-  useEffect(() => {
+useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setCurrentUser(user);
       if (user) {
-        const uid = user.uid;
+     const uid = user.uid;
         const userDoc = await getDoc(doc(db, 'users', uid));
-        const data = userDoc.data();
-
-        setUserName(data?.displayName || user.email || 'User');
-
-        const today = new Date();
-        const doneDates: string[] = [];
-
-        for (let offset = -59; offset <= 0; offset++) {
-          const dateStr = format(subDays(today, -offset), 'yyyy-MM-dd');
-          const cbSnap = await getDoc(doc(db, 'days', dateStr, 'checkboxes', uid));
-          const daySnap = await getDoc(doc(db, 'days', dateStr));
-
-          if (!cbSnap.exists() || !daySnap.exists()) continue;
-
-          const cb = cbSnap.data();
-          const dayData = daySnap.data();
-          const isFitnessDay = dayData?.isFitnessDay ?? true;
-
-          const isCompleted = cb.prayerDone && (isFitnessDay ? (cb.videoDone || cb.otherFitnessDone) : true);
-          if (isCompleted) doneDates.push(dateStr);
+        const userData = userDoc.data();
+        setUserName(userData?.displayName || user.email || 'User');
+        if (userData?.groupId) {
+          setUserGroupId(userData.groupId);
         }
-
-        setCompletedDates(doneDates);
-        setStreakCount(calculateStreak(new Set(doneDates), format(today, 'yyyy-MM-dd')));
-      } else {
-        navigate('/login');
       }
+      setLoading(false);
     });
 
-    return () => unsubscribe();
-  }, [navigate]);
+    return unsubscribe;
+  }, []);
 
+  if (loading) return <p>Loading...</p>;
   const handleLogout = async () => {
     await signOut(auth);
     navigate('/login');
@@ -62,17 +49,31 @@ export default function DashboardPage() {
  
 
     return (
-    <div className='container'>
-      <Logo size={200}/>
-      <h1 className='welcome'>Welcome, {userName}!</h1>
-      <h2 className='announcement'>Coming soon...stats and other stuff</h2>
+  <div className='container'>
+    <Logo size={200} />
+    {!currentUser && <p>Please sign in.</p>}
+    <h1 className='welcome'>Welcome, {userName}!</h1>
+    <h2 className='announcement'>Coming soon...stats and other stuff</h2>
+
+    {currentUser && !userGroupId && (
+      <GroupSelector
+        user={{
+          uid: currentUser.uid,
+          displayName: currentUser.displayName || '',
+          profilePicUrl: currentUser.photoURL || '',
+        }}
+        onGroupJoined={(groupId) => setUserGroupId(groupId)}
+      />
+    )}
+
+    {currentUser && userGroupId && (
       <div className='streak-box'>
         <h2>🔥 Current Streak: {streakCount} {streakCount === 1 ? 'day' : 'days'}</h2>
-      </div>
-      {/* <DailyStreak completedDates={completedDates} /> */}
-      {/* <StreakHeatmap completedDates={new Set(completedDates)} /> */}
-      <button onClick={handleLogout} className='logout-button'>Log Out</button>
-    </div>
-  );
-}
+ {/* <DailyStreak completedDates={completedDates} /> */}
+      {/* <StreakHeatmap completedDates={new Set(completedDates)} /> */}      </div>
+    )}
 
+    <button onClick={handleLogout} className='logout-button'>Log Out</button>
+  </div>
+);
+}
