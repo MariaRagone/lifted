@@ -1,8 +1,8 @@
-import { LogIn } from "lucide-react";
 import "./App.css";
+import DashboardPage from "./pages/DashboardPage";
 
 function App() {
-  return <LogIn />;
+  return <DashboardPage />;
 }
 
 export default App;

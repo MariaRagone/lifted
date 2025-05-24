@@ -93,22 +93,27 @@ const DailyLiftPage: React.FC = () => {
     })();
   }, [currentUser, selectedDate]);
   
-  useEffect(() => {
-    if (!currentUser) return;
-    (async () => {
-      const usersSnap = await getDocs(collection(db, 'users'));
-      const out: UserStatus[] = [];
-      for (const uDoc of usersSnap.docs) {
-        const uid = uDoc.id;
-        const profile = uDoc.data() as { profilePicUrl?: string; displayName?: string };
-        const cbSnap = await getDoc(doc(db, 'days', selectedDate, 'checkboxes', uid));
-        const cb = cbSnap.exists() ? (cbSnap.data() as Checkboxes) : DEFAULT_CHECKBOXES;
-        const completed = cb.prayerDone && (showFitness ? (cb.videoDone || cb.otherFitnessDone) : true);
-        out.push({ uid, profilePicUrl: profile.profilePicUrl, displayName: profile.displayName, completed });
-      }
-      setUserStatuses(out);
-    })();
-  }, [currentUser, selectedDate]);
+useEffect(() => {
+  if (!currentUser) return;
+
+  (async () => {
+    const usersSnap = await getDocs(collection(db, 'users'));
+
+    const userDocs = await Promise.all(usersSnap.docs.map(async (uDoc) => {
+      const uid = uDoc.id;
+      const profile = uDoc.data() as { profilePicUrl?: string; displayName?: string };
+
+      const cbSnap = await getDoc(doc(db, 'days', selectedDate, 'checkboxes', uid));
+      const cb = cbSnap.exists() ? (cbSnap.data() as Checkboxes) : DEFAULT_CHECKBOXES;
+      const completed = cb.prayerDone && (showFitness ? (cb.videoDone || cb.otherFitnessDone) : true);
+
+      return { uid, profilePicUrl: profile.profilePicUrl, displayName: profile.displayName, completed };
+    }));
+
+    setUserStatuses(userDocs);
+  })();
+}, [currentUser, selectedDate]);
+
   
  const saveCheckboxes = async (partial: Partial<Checkboxes>) => {
   if (!currentUser) return;
@@ -196,6 +201,7 @@ const DailyLiftPage: React.FC = () => {
       )}
 
       <h3>💛 Lift Circle</h3>
+      
       <div className="community-checkins">
         {userStatuses.map(({ uid, profilePicUrl, displayName, completed }) => (
           <div key={uid} className="user-checkin">
