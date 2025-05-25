@@ -178,7 +178,7 @@ useEffect(() => {
           <input
             type="text"
             className="input"
-            placeholder="🏃 Custom workout..."
+            placeholder="🏃 or log a custom workout..."
             value={checkboxes.otherFitnessNote || ''}
             onChange={(e) => saveCheckboxes({ otherFitnessNote: e.target.value })}
           />
