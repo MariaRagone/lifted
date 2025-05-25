@@ -49,6 +49,25 @@ useEffect(() => {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+  if (!currentUser) return;
+
+  const fetchUserData = async () => {
+    const uid = currentUser.uid;
+    const userDoc = await getDoc(doc(db, 'users', uid));
+    const userData = userDoc.data();
+    setUserName(userData?.displayName || currentUser.email || 'User');
+
+    const groupIds: string[] = userData?.groupIds || (userData?.groupId ? [userData.groupId] : []);
+    setUserGroupIds(groupIds);
+
+    setLoading(false); // ✅ now we’re truly done loading
+  };
+
+  fetchUserData();
+}, [currentUser]);
+
+
   if (loading) return <p>Loading...</p>;
   const handleLogout = async () => {
     await signOut(auth);
