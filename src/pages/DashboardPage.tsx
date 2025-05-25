@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../library/firebase';
 import { useNavigate } from 'react-router-dom';
 import { format, subDays } from 'date-fns';
@@ -10,6 +10,14 @@ import StreakHeatmap from '../components/StreakHeatmap';
 import Devotional from '../components/Devotional';
 import Logo from '../components/Logo';
 import GroupSelector from '../components/GroupSelector'; 
+import GroupMembers from '../components/GroupMemembers';
+
+interface UserStatus {
+  uid: string;
+  displayName?: string;
+  profilePicUrl?: string;
+  completed: boolean;
+}
 
 
 export default function DashboardPage() {
@@ -18,7 +26,8 @@ export default function DashboardPage() {
   const [streakCount, setStreakCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [userGroupId, setUserGroupId] = useState<string | null>(null);
+  const [userGroupIds, setUserGroupIds] = useState<string[]>([]);
+  const [groupMembers, setGroupMembers] = useState<Record<string, UserStatus[]>>({});
 
   const navigate = useNavigate();
 
@@ -31,7 +40,7 @@ useEffect(() => {
         const userData = userDoc.data();
         setUserName(userData?.displayName || user.email || 'User');
         if (userData?.groupId) {
-          setUserGroupId(userData.groupId);
+          setUserGroupIds(userData.groupId);
         }
       }
       setLoading(false);
@@ -46,6 +55,23 @@ useEffect(() => {
     navigate('/login');
   };
 
+  const handleLeaveGroup = async (groupId: string) => {
+  if (!currentUser) return;
+
+  await setDoc(doc(db, 'groups', groupId, 'members', currentUser.uid), {}, { merge: false });
+
+  const userRef = doc(db, 'users', currentUser.uid);
+  const userSnap = await getDoc(userRef);
+  const userData = userSnap.data();
+  const currentGroups: string[] = userData?.groupIds || [];
+
+  const updatedGroups = currentGroups.filter((id) => id !== groupId);
+
+  await setDoc(userRef, { groupIds: updatedGroups }, { merge: true });
+
+  setUserGroupIds(updatedGroups);
+};
+
  
 
     return (
@@ -55,25 +81,55 @@ useEffect(() => {
     <h1 className='welcome'>Welcome, {userName}!</h1>
     <h2 className='announcement'>Coming soon...stats and other stuff</h2>
 
-    {currentUser && !userGroupId && (
-      <GroupSelector
-        user={{
-          uid: currentUser.uid,
-          displayName: currentUser.displayName || '',
-          profilePicUrl: currentUser.photoURL || '',
-        }}
-        onGroupJoined={(groupId) => setUserGroupId(groupId)}
-      />
-    )}
 
-    {currentUser && userGroupId && (
+    {currentUser && userGroupIds && (
       <div className='streak-box'>
         <h2>🔥 Current Streak: {streakCount} {streakCount === 1 ? 'day' : 'days'}</h2>
  {/* <DailyStreak completedDates={completedDates} /> */}
       {/* <StreakHeatmap completedDates={new Set(completedDates)} /> */}      </div>
     )}
+{currentUser && userGroupIds.length > 0 && (
+  <>
+    <h3 style={{ marginLeft: '20px' }}>
+      {userGroupIds.length > 1 ? 'My Lift Circles' : 'My Lift Circle'}
+    </h3>
+    {userGroupIds.map((groupId) => (
+<div key={groupId} style={{ marginBottom: '20px' }}>
+  <GroupMembers groupId={groupId} selectedDate={''} showFitness={false} />
+  <button
+    onClick={() => handleLeaveGroup(groupId)}
+    style={{
+      marginLeft: '20px',
+      backgroundColor: '#e05d5d',
+      border: 'none',
+      borderRadius: '6px',
+      padding: '6px 12px',
+      color: 'white',
+      fontWeight: 'bold',
+      cursor: 'pointer'
+    }}
+  >
+    Leave Group
+  </button>
+</div>
+    ))}
+  </>
+)}
 
-    <button onClick={handleLogout} className='logout-button'>Log Out</button>
+    {currentUser && (
+<GroupSelector
+  user={{
+    uid: currentUser.uid,
+    displayName: currentUser.displayName || '',
+    profilePicUrl: currentUser.photoURL || '',
+  }}
+  onGroupJoined={(newGroupId) => {
+    setUserGroupIds((prev) => [...new Set([...prev, newGroupId])]);
+  }}
+/>
+    )}
+
+    <button style={{ marginBottom: '60px'}} onClick={handleLogout} className='logout-button'>Log Out</button>
   </div>
 );
 }
