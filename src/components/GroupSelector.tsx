@@ -38,7 +38,8 @@ const GroupSelector: React.FC<GroupSelectorProps> = ({ user, onGroupJoined }) =>
     const groupName = groupInput.trim();
     if (!groupName) return;
 
-    const groupId = groupName.toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(2, 8);
+    const groupId = groupName
+    
     const groupRef = doc(db, 'groups', groupId);
 
     await setDoc(groupRef, {
