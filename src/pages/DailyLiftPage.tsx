@@ -102,10 +102,10 @@ useEffect(() => {
     fetchGroupIds();
   }, [currentUser]);
 
-  useEffect(() => {
-    setCheckboxes(DEFAULT_CHECKBOXES);
-    setUserStatuses([]);
-  }, [selectedDate]);
+useEffect(() => {
+  setUserStatuses([]);
+}, [selectedDate]);
+
 
   useEffect(() => {
   if (!currentUser) {
@@ -167,6 +167,39 @@ useEffect(() => {
       );
 
       setUserStatuses(userDocs);
+    })();
+  }, [currentUser, selectedDate]);
+
+   useEffect(() => {
+    if (!currentUser) return;
+    const fetchCheckboxes = async () => {
+      const cbSnap = await getDoc(doc(db, 'days', selectedDate, 'checkboxes', currentUser.uid));
+      if (cbSnap.exists()) {
+        setCheckboxes(cbSnap.data() as Checkboxes);
+      } else {
+        setCheckboxes(DEFAULT_CHECKBOXES);
+      }
+    };
+    fetchCheckboxes();
+  }, [currentUser, selectedDate]);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setCompletedDates(new Set());
+      return;
+    }
+
+    (async () => {
+      const doneSet = new Set<string>();
+      for (let offset = -30; offset <= 5; offset++) {
+        const d = format(addDays(new Date(selectedDate), offset), 'yyyy-MM-dd');
+        const cbSnap = await getDoc(doc(db, 'days', d, 'checkboxes', currentUser.uid));
+        if (!cbSnap.exists()) continue;
+        const cb = cbSnap.data() as Checkboxes;
+        const completed = cb.prayerDone && (isFitnessDay(d) ? (cb.videoDone || cb.otherFitnessDone) : true);
+        if (completed) doneSet.add(d);
+      }
+      setCompletedDates(doneSet);
     })();
   }, [currentUser, selectedDate]);
 
