@@ -42,7 +42,8 @@ const GroupMembers: React.FC<GroupMembersProps> = ({ groupId, selectedDate, show
             const uid = docSnap.id;
             const { displayName, profilePicUrl } = docSnap.data();
 
-            const cbSnap = await getDoc(doc(db, 'groups', groupId, 'days', selectedDate, 'checkboxes', uid));
+const cbSnap = await getDoc(doc(db, 'days', selectedDate, 'checkboxes', uid));
+
             const cb = cbSnap.exists() ? cbSnap.data() : DEFAULT_CHECKBOXES;
             const completed =
               cb.prayerDone && (showFitness ? (cb.videoDone || cb.otherFitnessDone) : true);
