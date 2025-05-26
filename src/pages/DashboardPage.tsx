@@ -114,6 +114,7 @@ useEffect(() => {
     </h3>
     {userGroupIds.map((groupId) => (
 <div key={groupId} style={{ marginBottom: '20px' }}>
+  
   <GroupMembers groupId={groupId} selectedDate={''} showFitness={false} />
   <button
     onClick={() => handleLeaveGroup(groupId)}

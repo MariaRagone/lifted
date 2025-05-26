@@ -12,6 +12,8 @@ import Devotional from '../components/Devotional';
 import Logo from '../components/Logo';
 import GroupMembers from '../components/GroupMemembers';
 import devos from '../data/daily-lift-devotionals.json';
+import DeployAlert from '../components/DeployAlert';
+
 
 interface DevotionalEntry {
   id: number;
@@ -220,6 +222,7 @@ useEffect(() => {
   return (
     <div className="daily-page">
       <Logo size={200} />
+      <DeployAlert />
       <ScrollingDates
         dates={allDates}
         selectedDate={selectedDate}
