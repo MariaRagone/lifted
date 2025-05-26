@@ -6,6 +6,8 @@ import './GroupSelector.css';
 interface GroupSelectorProps {
   user: { uid: string; displayName?: string; profilePicUrl?: string };
   onGroupJoined: (groupId: string) => void;
+  onGroupsUpdated?: (groupIds: string[]) => void;
+
 }
 
 const GroupSelector: React.FC<GroupSelectorProps> = ({ user, onGroupJoined }) => {

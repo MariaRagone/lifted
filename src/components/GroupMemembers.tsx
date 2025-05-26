@@ -25,53 +25,54 @@ const DEFAULT_CHECKBOXES = {
 const GroupMembers: React.FC<GroupMembersProps> = ({ groupId, selectedDate, showFitness }) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [groupName, setGroupName] = useState<string>(groupId);
-useEffect(() => {
-    console.log(`Fetching members for group: ${groupId}`);
-    console.log(`Selected date: ${selectedDate}`);
-    console.log(`Show fitness: ${showFitness}`);
-  }, [groupId, selectedDate, showFitness]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!groupId || !selectedDate) return;
 
-    const fetchGroupMembersWithStatus = async () => {
-      const membersRef = collection(db, 'groups', groupId, 'members');
-      const snapshot = await getDocs(membersRef);
+    const fetchGroupInfo = async () => {
+      setLoading(true);
+      try {
+        // Fetch members
+        const membersRef = collection(db, 'groups', groupId, 'members');
+        const snapshot = await getDocs(membersRef);
 
-      const results = await Promise.all(
-        snapshot.docs.map(async (docSnap) => {
-          const uid = docSnap.id;
-          const { displayName, profilePicUrl } = docSnap.data();
+        const results = await Promise.all(
+          snapshot.docs.map(async (docSnap) => {
+            const uid = docSnap.id;
+            const { displayName, profilePicUrl } = docSnap.data();
 
-          const cbSnap = await getDoc(doc(db, 'groups', groupId, 'days', selectedDate, 'checkboxes', uid));
-          const cb = cbSnap.exists() ? cbSnap.data() : DEFAULT_CHECKBOXES;
-          const completed =
-            cb.prayerDone && (showFitness ? (cb.videoDone || cb.otherFitnessDone) : true);
+            const cbSnap = await getDoc(doc(db, 'groups', groupId, 'days', selectedDate, 'checkboxes', uid));
+            const cb = cbSnap.exists() ? cbSnap.data() : DEFAULT_CHECKBOXES;
+            const completed =
+              cb.prayerDone && (showFitness ? (cb.videoDone || cb.otherFitnessDone) : true);
 
-          return { uid, displayName, profilePicUrl, completed };
-        })
-      );
-console.log('Fetched members:', results);
+            return { uid, displayName, profilePicUrl, completed };
+          })
+        );
 
-      setMembers(results);
-    };
+        setMembers(results);
 
-    const fetchGroupName = async () => {
-      const groupDoc = await getDoc(doc(db, 'groups', groupId));
-      if (groupDoc.exists()) {
-        const data = groupDoc.data();
-        if (data?.name) setGroupName(data.name);
+        // Fetch group name
+        const groupDoc = await getDoc(doc(db, 'groups', groupId));
+        if (groupDoc.exists()) {
+          const data = groupDoc.data();
+          if (data?.name) setGroupName(data.name);
+        }
+      } catch (err) {
+        console.error('Error loading group members:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchGroupMembersWithStatus();
-    fetchGroupName();
+    fetchGroupInfo();
   }, [groupId, selectedDate, showFitness]);
 
-  if (!groupId) {
+  if (!groupId || loading) {
     return (
       <p style={{ textAlign: 'center', color: '#888' }}>
-        Join a Lift Circle to see your group members here.
+        Loading Lift Circle...
       </p>
     );
   }
@@ -80,9 +81,9 @@ console.log('Fetched members:', results);
   const progressPercent = members.length > 0 ? (completedCount / members.length) * 100 : 0;
 
   const getBarColor = (percent: number) => {
-    if (percent === 100) return '#4caf50'; // green
-    if (percent >= 60) return '#f9b95c'; // yellow/orange
-    return '#e05d5d'; // red
+    if (percent === 100) return '#4caf50';
+    if (percent >= 60) return '#f9b95c';
+    return '#e05d5d';
   };
 
   return (
