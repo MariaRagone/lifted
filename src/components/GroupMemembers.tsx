@@ -24,6 +24,12 @@ const DEFAULT_CHECKBOXES = {
 
 const GroupMembers: React.FC<GroupMembersProps> = ({ groupId, selectedDate, showFitness }) => {
   const [members, setMembers] = useState<Member[]>([]);
+  const [groupName, setGroupName] = useState<string>(groupId);
+useEffect(() => {
+    console.log(`Fetching members for group: ${groupId}`);
+    console.log(`Selected date: ${selectedDate}`);
+    console.log(`Show fitness: ${showFitness}`);
+  }, [groupId, selectedDate, showFitness]);
 
   useEffect(() => {
     if (!groupId || !selectedDate) return;
@@ -45,11 +51,21 @@ const GroupMembers: React.FC<GroupMembersProps> = ({ groupId, selectedDate, show
           return { uid, displayName, profilePicUrl, completed };
         })
       );
+console.log('Fetched members:', results);
 
       setMembers(results);
     };
 
+    const fetchGroupName = async () => {
+      const groupDoc = await getDoc(doc(db, 'groups', groupId));
+      if (groupDoc.exists()) {
+        const data = groupDoc.data();
+        if (data?.name) setGroupName(data.name);
+      }
+    };
+
     fetchGroupMembersWithStatus();
+    fetchGroupName();
   }, [groupId, selectedDate, showFitness]);
 
   if (!groupId) {
@@ -60,9 +76,44 @@ const GroupMembers: React.FC<GroupMembersProps> = ({ groupId, selectedDate, show
     );
   }
 
+  const completedCount = members.filter((m) => m.completed).length;
+  const progressPercent = members.length > 0 ? (completedCount / members.length) * 100 : 0;
+
+  const getBarColor = (percent: number) => {
+    if (percent === 100) return '#4caf50'; // green
+    if (percent >= 60) return '#f9b95c'; // yellow/orange
+    return '#e05d5d'; // red
+  };
+
   return (
     <div className="group-members">
-      <h4 style={{ marginLeft: '20px', marginBottom: '6px' }}>{groupId}</h4>
+      <h4 style={{ marginLeft: '20px', marginBottom: '6px' }}>{groupName}</h4>
+
+      <div style={{ marginLeft: '20px', marginBottom: '12px' }}>
+        <div
+          style={{
+            height: '8px',
+            background: '#e0e0e0',
+            borderRadius: '4px',
+            overflow: 'hidden',
+            width: '90%',
+            maxWidth: '400px',
+          }}
+        >
+          <div
+            style={{
+              width: `${progressPercent}%`,
+              height: '100%',
+              backgroundColor: getBarColor(progressPercent),
+              transition: 'width 0.4s ease',
+            }}
+          />
+        </div>
+        <p style={{ fontSize: '12px', marginTop: '4px', color: '#093d44' }}>
+          ✅ {completedCount} of {members.length} completed
+        </p>
+      </div>
+
       <div className="community-checkins">
         {members.map(({ uid, displayName, profilePicUrl, completed }) => (
           <div key={uid} className="user-checkin">

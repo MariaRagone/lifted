@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../library/firebase';
 import './GroupSelector.css';
@@ -12,51 +12,67 @@ const GroupSelector: React.FC<GroupSelectorProps> = ({ user, onGroupJoined }) =>
   const [mode, setMode] = useState<'join' | 'create'>('join');
   const [groupInput, setGroupInput] = useState('');
   const [error, setError] = useState('');
-
+  
+  
   const handleJoin = async () => {
     const groupId = groupInput.trim();
     if (!groupId) return;
-
+    
     const groupRef = doc(db, 'groups', groupId);
     const groupSnap = await getDoc(groupRef);
-
+    
     if (!groupSnap.exists()) {
       setError('Group not found. Check the code and try again.');
       return;
     }
-
+    
     await setDoc(doc(db, 'groups', groupId, 'members', user.uid), {
       displayName: user.displayName ?? '',
       profilePicUrl: user.profilePicUrl ?? '',
     });
-
-    await setDoc(doc(db, 'users', user.uid), { groupId }, { merge: true });
+    
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
+    const currentGroups: string[] = userData?.groupIds || [];
+    
+    const updatedGroups = Array.from(new Set([...currentGroups, groupId]));
+    
+    await setDoc(userRef, { groupIds: updatedGroups }, { merge: true });
+    
     onGroupJoined(groupId);
   };
-
+  
   const handleCreate = async () => {
     const groupName = groupInput.trim();
     if (!groupName) return;
-
-    const groupId = groupName
+    
+    const groupId = groupName;
     
     const groupRef = doc(db, 'groups', groupId);
-
     await setDoc(groupRef, {
       name: groupName,
       createdBy: user.uid,
     });
-
+    
     await setDoc(doc(db, 'groups', groupId, 'members', user.uid), {
       displayName: user.displayName ?? '',
       profilePicUrl: user.profilePicUrl ?? '',
     });
-
-    await setDoc(doc(db, 'users', user.uid), { groupId }, { merge: true });
+    
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
+    const currentGroups: string[] = userData?.groupIds || [];
+    
+    const updatedGroups = Array.from(new Set([...currentGroups, groupId]));
+    
+    await setDoc(userRef, { groupIds: updatedGroups }, { merge: true });
+    
     onGroupJoined(groupId);
   };
-
-  return (
+  
+    return (
     <div className="group-selector">
       <h3>{mode === 'create' ? 'Create a Lift Circle' : 'Join a Lift Circle'}</h3>
 
@@ -66,7 +82,7 @@ const GroupSelector: React.FC<GroupSelectorProps> = ({ user, onGroupJoined }) =>
         value={groupInput}
         onChange={(e) => setGroupInput(e.target.value)}
         className="input"
-      />
+        />
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
 

@@ -10,6 +10,7 @@ import { getInitials } from '../utilities/userHelpers';
 import WorkoutVideos from '../components/WorkoutVideos';
 import Devotional from '../components/Devotional';
 import Logo from '../components/Logo';
+import GroupMembers from '../components/GroupMemembers';
 import devos from '../data/daily-lift-devotionals.json';
 
 interface DevotionalEntry {
@@ -51,12 +52,43 @@ const DailyLiftPage: React.FC = () => {
   const allDates = generateDateRange(-30, 5);
   const showFitness = isFitnessDay(selectedDate);
   const todayDevo = devos.find((d) => d.date === selectedDate) as DevotionalEntry | undefined;
+  const [userGroupIds, setUserGroupIds] = useState<string[]>([]);
+
+// useEffect(() => {
+//   if (!currentUser) return;
+
+//   const fetchGroupIds = async () => {
+//     const userRef = doc(db, 'users', currentUser.uid);
+//     const userSnap = await getDoc(userRef);
+//     const userData = userSnap.data();
+//     const groups: string[] = userData?.groupIds || (userData?.groupId ? [userData.groupId] : []);
+//     setUserGroupIds(groups);
+//   };
+
+//   fetchGroupIds();
+// }, [currentUser]);
+
   
-  
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setCurrentUser);
-    return unsubscribe;
-  }, []);
+//   useEffect(() => {
+//     const unsubscribe = onAuthStateChanged(auth, setCurrentUser);
+//     return unsubscribe;
+//   }, []);
+
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    setCurrentUser(user);
+    if (user) {
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      const userData = userSnap.data();
+      const groups: string[] = userData?.groupIds || (userData?.groupId ? [userData.groupId] : []);
+      setUserGroupIds(groups);
+    }
+  });
+
+  return unsubscribe;
+}, []);
+
   
   useEffect(() => {
     setCheckboxes(DEFAULT_CHECKBOXES);
@@ -160,9 +192,8 @@ useEffect(() => {
             />
             <h3 >🏅 Fitness Challenge</h3>
           </div>
-<WorkoutVideos selectedDate={selectedDate} />
+        <WorkoutVideos selectedDate={selectedDate} />
 
-          {/* <WorkoutVideos /> */}
           <hr />
 
             {todayDevo?.funnyInspiration && (
@@ -170,7 +201,7 @@ useEffect(() => {
                 <p className="funny-inspiration-emoji">😄</p>
                 <p className="funny-inspiration-text">{todayDevo.funnyInspiration}</p>
               </div>
-)}
+            )}
          <hr />
         </>
       )}
@@ -200,21 +231,22 @@ useEffect(() => {
           />
 
 
+      {userGroupIds.length > 0 && (
+  <>
+    <h3>💛 {userGroupIds.length > 1 ? 'My Lift Circles' : 'My Lift Circle'}</h3>
 
-      <h3>💛 My Lift Circle</h3>
-      
-      <div className="community-checkins">
-        {userStatuses.map(({ uid, profilePicUrl, displayName, completed }) => (
-          <div key={uid} className="user-checkin">
-            {profilePicUrl ? (
-              <img src={profilePicUrl} alt={displayName ?? 'User'} />
-            ) : (
-              <div className="avatar-fallback">{getInitials(displayName)}</div>
-            )}
-            {completed && <span className="checkmark">✓</span>}
-          </div>
-        ))}
+    {userGroupIds.map((groupId) => (
+      <div key={groupId}>
+        <GroupMembers
+          groupId={groupId}
+          selectedDate={selectedDate}
+          showFitness={showFitness}
+        />
       </div>
+    ))}
+  </>
+)}
+
       <p className="encourage">
         Lift up your friends in prayer and encourage them to do their daily lift!
       </p>
