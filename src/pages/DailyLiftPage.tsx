@@ -165,23 +165,6 @@ useEffect(() => {
           {/* <WorkoutVideos /> */}
           <hr />
 
-          <div className="section-header">
-            <input
-              className="checkboxes"
-              type="checkbox"
-              checked={checkboxes.otherFitnessDone}
-              onChange={() => saveCheckboxes({ otherFitnessDone: !checkboxes.otherFitnessDone })}
-            />
-            <h3>📝 Custom Workout</h3>
-          </div>
-
-          <input
-            type="text"
-            className="input"
-            placeholder="🏃 or log a custom workout..."
-            value={checkboxes.otherFitnessNote || ''}
-            onChange={(e) => saveCheckboxes({ otherFitnessNote: e.target.value })}
-          />
             {todayDevo?.funnyInspiration && (
               <div className="funny-inspiration-card">
                 <p className="funny-inspiration-emoji">😄</p>
@@ -192,15 +175,33 @@ useEffect(() => {
         </>
       )}
 
-      {!showFitness && (
-        <>
-          <h3>🧘‍♀️ Rest Day</h3>
-          <p>Use today to reflect, stretch, or rest—you’ve earned it!</p>
-          <hr />
-        </>
-      )}
+                  {!showFitness && (
+                    <>
+                     <h3>🧘‍♀️ Rest Day</h3>
+                      <p>Use today to reflect, stretch, or rest—you’ve earned it!</p>
+                      <hr />
+                    </>
+                  )}
+                <div className="section-header">
+            <input
+              className="checkboxes"
+              type="checkbox"
+              checked={checkboxes.otherFitnessDone}
+              onChange={() => saveCheckboxes({ otherFitnessDone: !checkboxes.otherFitnessDone })}
+            />
+  <h3>📝 Custom Workout {showFitness ? '' : '(Optional)'}</h3>          </div>
 
-      <h3>💛 Lift Circle</h3>
+          <input
+            type="text"
+            className="input"
+            placeholder="🏃 log a custom workout..."
+            value={checkboxes.otherFitnessNote || ''}
+            onChange={(e) => saveCheckboxes({ otherFitnessNote: e.target.value })}
+          />
+
+
+
+      <h3>💛 My Lift Circle</h3>
       
       <div className="community-checkins">
         {userStatuses.map(({ uid, profilePicUrl, displayName, completed }) => (
