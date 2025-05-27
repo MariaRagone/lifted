@@ -43,13 +43,14 @@ const DeployToast: React.FC = () => {
     <div className="deploy-toast">
       <strong>🚀 What's New:</strong>
       <ul>
-        <li>📣 Users can connect to GoogleFit</li>
+        <li>📣 Users can connect to GoogleFit to show steps and heartpoints</li>
         <li>📣 About page added.</li>
         <li>📣 Added privacy policy</li>
+        <li>📣 Users can log an optional workout on rest days.</li>
+        <li>📣 Users can create and join unique groups</li>
         <li>📣 Lift Circles show progress bars</li>
         <li>📣 Daily checkmarks now persist correctly</li>
         <li>📣 Bug fixes and UI improvements</li>
-        <li>📣 Users can create and join unique groups</li>
 
       </ul>
       <button onClick={dismissToast} className="toast-close">Got it</button>

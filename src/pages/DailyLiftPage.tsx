@@ -14,7 +14,7 @@ import GroupMembers from '../components/GroupMemembers';
 import devos from '../data/daily-lift-devotionals.json';
 import DeployToast from '../components/DeployToast';
 import GoogleFitConnect from '../library/GoogleFitConnect';
-import StepCount from '../components/StepCount';
+import DailyFitnessMetrics from '../components/DailyFitnessMetrics';
 
 interface DevotionalEntry {
   id: number;
@@ -308,9 +308,13 @@ useEffect(() => {
         value={checkboxes.otherFitnessNote || ''}
         onChange={(e) => saveCheckboxes({ otherFitnessNote: e.target.value })}
       />
-        {currentUser && (
-      <StepCount userId={currentUser.uid} selectedDate={selectedDate} />
-        )}
+{currentUser && (
+  <DailyFitnessMetrics
+    userId={currentUser.uid}
+    selectedDate={selectedDate}
+  />
+)}
+
 
       {!loading && userGroupIds.length > 0 && (
         <>

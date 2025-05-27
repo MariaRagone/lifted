@@ -11,6 +11,7 @@ import Devotional from '../components/Devotional';
 import Logo from '../components/Logo';
 import GroupSelector from '../components/GroupSelector'; 
 import GroupMembers from '../components/GroupMemembers';
+import ActivitySummary from '../components/GoogleFitSummary';
 
 interface UserStatus {
   uid: string;
@@ -98,7 +99,7 @@ useEffect(() => {
     <Logo size={200} />
     {!currentUser && <p>Please sign in.</p>}
     <h1 className='welcome'>Welcome, {userName}!</h1>
-    <h2 className='announcement'>Coming soon...stats and other stuff</h2>
+    <h2 className='announcement'>This page is in test mode! Coming soon...stats and other stuff</h2>
 
 
     {currentUser && userGroupIds && (
@@ -107,6 +108,8 @@ useEffect(() => {
  {/* <DailyStreak completedDates={completedDates} /> */}
       {/* <StreakHeatmap completedDates={new Set(completedDates)} /> */}      </div>
     )}
+    <ActivitySummary steps={10234} heartPoints={10} />
+
 {currentUser && userGroupIds.length > 0 && (
   <>
     <h3 style={{ marginLeft: '20px' }}>

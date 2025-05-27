@@ -1,0 +1,35 @@
+.activity-summary-card {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #e7f4f2;
+  border: 1px solid #b0ded6;
+  border-radius: 12px;
+  padding: 12px 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.activity-block {
+  text-align: center;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  color: #0b3d3f;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.value {
+  font-size: 20px;
+  color: #054f4f;
+  font-weight: bold;
+}
+
+.divider {
+  width: 1px;
+  height: 40px;
+  background-color: #a3cfc8;
+}
