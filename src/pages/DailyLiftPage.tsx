@@ -14,6 +14,7 @@ import GroupMembers from '../components/GroupMemembers';
 import devos from '../data/daily-lift-devotionals.json';
 import DeployToast from '../components/DeployToast';
 import GoogleFitConnect from '../library/GoogleFitConnect';
+import StepCount from '../components/StepCount';
 
 interface DevotionalEntry {
   id: number;
@@ -53,10 +54,28 @@ const DailyLiftPage: React.FC = () => {
   const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());
   const [userGroupIds, setUserGroupIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stepCount, setStepCount] = useState<number | null>(null);
+
 
   const allDates = generateDateRange(-30, 5);
   const showFitness = isFitnessDay(selectedDate);
   const todayDevo = devos.find((d) => d.date === selectedDate) as DevotionalEntry | undefined;
+  
+useEffect(() => {
+  if (!currentUser) return;
+
+  const fetchSavedSteps = async () => {
+    const stepDoc = await getDoc(doc(db, 'users', currentUser.uid, 'steps', selectedDate));
+    if (stepDoc.exists()) {
+      const data = stepDoc.data();
+      setStepCount(data.steps || 0);
+    } else {
+      setStepCount(null); // no data yet
+    }
+  };
+
+  fetchSavedSteps();
+}, [currentUser, selectedDate]);
 
 useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -289,7 +308,9 @@ useEffect(() => {
         value={checkboxes.otherFitnessNote || ''}
         onChange={(e) => saveCheckboxes({ otherFitnessNote: e.target.value })}
       />
-      <GoogleFitConnect />
+        {currentUser && (
+      <StepCount userId={currentUser.uid} selectedDate={selectedDate} />
+        )}
 
       {!loading && userGroupIds.length > 0 && (
         <>

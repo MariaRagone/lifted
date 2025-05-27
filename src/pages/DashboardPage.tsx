@@ -11,7 +11,6 @@ import Devotional from '../components/Devotional';
 import Logo from '../components/Logo';
 import GroupSelector from '../components/GroupSelector'; 
 import GroupMembers from '../components/GroupMemembers';
-import GoogleFit from '../library/GoogleFit';
 
 interface UserStatus {
   uid: string;
@@ -115,7 +114,6 @@ useEffect(() => {
     </h3>
     {userGroupIds.map((groupId) => (
 <div key={groupId} style={{ marginBottom: '20px' }}>
-  {/* <GoogleFit accessToken={'AIzaSyAZjxQ9__E_rtMY74GtgTh1MiXsrKEyNOk'} /> */}
   <GroupMembers groupId={groupId} selectedDate={''} showFitness={false} />
   <button
     onClick={() => handleLeaveGroup(groupId)}
