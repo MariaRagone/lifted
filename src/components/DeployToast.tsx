@@ -4,7 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../library/firebase';
 import './DeployToast.css';
 
-const APP_VERSION = '2025-05-26-v1';
+const APP_VERSION = '2025-05-26-v2';
 
 const DeployToast: React.FC = () => {
   const [show, setShow] = useState(false);
