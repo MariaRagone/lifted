@@ -8,7 +8,9 @@ import ProtectedRoute from './pages/ProtectedRoute'
 import DailyLiftPage from './pages/DailyLiftPage'
 import BottomNavBar from './components/BottomNavBar'
 import FavoritesPage from './pages/FavoritesPage'
+import PrivacyPolicy from './pages/PrivacyPolicy'
 import { AuthProvider } from './contexts/AuthContext'
+import AboutPage from './pages/AboutPage'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -21,6 +23,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/devotional" element={<DailyLiftPage />} />
         <Route path="/favorites" element={<FavoritesPage />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/about" element={<AboutPage />} />
 
 
 

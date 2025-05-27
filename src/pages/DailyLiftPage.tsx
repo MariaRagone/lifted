@@ -12,9 +12,8 @@ import Devotional from '../components/Devotional';
 import Logo from '../components/Logo';
 import GroupMembers from '../components/GroupMemembers';
 import devos from '../data/daily-lift-devotionals.json';
-import DeployAlert from '../components/DeployAlert';
 import DeployToast from '../components/DeployToast';
-
+import GoogleFitConnect from '../library/GoogleFitConnect';
 
 interface DevotionalEntry {
   id: number;
@@ -223,7 +222,6 @@ useEffect(() => {
   return (
     <div className="daily-page">
       <Logo size={200} />
-      {/* <DeployAlert /> */}
       <DeployToast />
       <ScrollingDates
         dates={allDates}
@@ -241,7 +239,6 @@ useEffect(() => {
         />
         <h3>🙏 Prayer</h3>
       </div>
-
       <Devotional selectedDate={selectedDate} />
 
       {showFitness && (
@@ -292,6 +289,7 @@ useEffect(() => {
         value={checkboxes.otherFitnessNote || ''}
         onChange={(e) => saveCheckboxes({ otherFitnessNote: e.target.value })}
       />
+      <GoogleFitConnect />
 
       {!loading && userGroupIds.length > 0 && (
         <>
