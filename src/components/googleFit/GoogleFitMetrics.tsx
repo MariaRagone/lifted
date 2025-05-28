@@ -2,6 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { gapi } from 'gapi-script';
 import { isSameDay, parseISO } from 'date-fns';
+/// <reference types="gapi.client" />
+/// <reference types="gapi.client.fitness" />
+/// <reference types="gapi.auth2" />
 
 interface Props {
   selectedDate: string; // yyyy-MM-dd
@@ -11,34 +14,49 @@ const GoogleFitMetrics: React.FC<Props> = ({ selectedDate }) => {
   const [steps, setSteps] = useState<number | null>(null);
   const [heartPoints, setHeartPoints] = useState<number | null>(null);
 
-  const fetchGoogleFitData = async () => {
-    const parsedDate = parseISO(selectedDate);
-    const startTime = parsedDate.setHours(0, 0, 0, 0);
-    const endTime = parsedDate.setHours(23, 59, 59, 999);
+const fetchGoogleFitData = async () => {
+  // parse once
+  const day = parseISO(selectedDate);
 
-    const stepResult = await gapi.client.fitness.users.dataset.aggregate({
-      userId: 'me',
-      resource: {
-        aggregateBy: [{ dataTypeName: 'com.google.step_count.delta' }],
-        bucketByTime: { durationMillis: 86400000 },
-        startTimeMillis: startTime,
-        endTimeMillis: endTime,
-      },
-    });
+  // start of day
+  const startDate = new Date(day);
+  startDate.setHours(0, 0, 0, 0);
+  const startTimeMillis = startDate.getTime().toString();
 
-    const heartResult = await gapi.client.fitness.users.dataset.aggregate({
-      userId: 'me',
-      resource: {
-        aggregateBy: [{ dataTypeName: 'com.google.heart_minutes' }],
-        bucketByTime: { durationMillis: 86400000 },
-        startTimeMillis: startTime,
-        endTimeMillis: endTime,
-      },
-    });
+  // end of day
+  const endDate = new Date(day);
+  endDate.setHours(23, 59, 59, 999);
+  const endTimeMillis = endDate.getTime().toString();
 
-    setSteps(stepResult.result.bucket?.[0]?.dataset?.[0]?.point?.[0]?.value?.[0]?.intVal || 0);
-    setHeartPoints(heartResult.result.bucket?.[0]?.dataset?.[0]?.point?.[0]?.value?.[0]?.fpVal || 0);
-  };
+  const stepResult = await gapi.client.fitness.users.dataset.aggregate({
+    userId: 'me',
+    resource: {
+      aggregateBy: [{ dataTypeName: 'com.google.step_count.delta' }],
+      bucketByTime: { durationMillis: '86400000' },
+      startTimeMillis,
+      endTimeMillis,
+    },
+  });
+
+  const heartResult = await gapi.client.fitness.users.dataset.aggregate({
+    userId: 'me',
+    resource: {
+      aggregateBy: [{ dataTypeName: 'com.google.heart_minutes' }],
+      bucketByTime: { durationMillis: '86400000' },
+      startTimeMillis,
+      endTimeMillis,
+    },
+  });
+
+  setSteps(
+    stepResult.result.bucket?.[0]?.dataset?.[0]?.point?.[0]?.value?.[0]
+      ?.intVal ?? 0
+  );
+  setHeartPoints(
+    heartResult.result.bucket?.[0]?.dataset?.[0]?.point?.[0]?.value?.[0]
+      ?.fpVal ?? 0
+  );
+};
 
   useEffect(() => {
     fetchGoogleFitData();
