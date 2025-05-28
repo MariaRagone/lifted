@@ -1,20 +1,13 @@
 // src/pages/DashboardPage.tsx
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { onSnapshot, doc, Unsubscribe, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../library/firebase';
 import { useNavigate } from 'react-router-dom';
-import { format, subDays } from 'date-fns';
-
-import DailyStreak from '../components/DailyStreak';
-import { calculateStreak } from '../utilities/dailyStreakHelpers';
-import StreakHeatmap from '../components/StreakHeatmap';
-import Devotional from '../components/Devotional';
 import Logo from '../components/Logo';
 import GroupSelector from '../components/GroupSelector';
 import GroupMembers from '../components/GroupMemembers';
 import '../components/Buttons.css';
-
 import GoogleFitConnect from '../library/GoogleFitConnect';
 import GoogleFitDisconnect from '../components/googleFit/GoogleFitDisconnect';
 
@@ -36,69 +29,67 @@ export default function DashboardPage() {
 
   const navigate = useNavigate();
 
-  // Listen for Firebase auth & load initial user data
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribeDoc: Unsubscribe | undefined;
+
+    // 1) Auth listener
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      setLoading(false);
+
+      // tear down any previous doc listener
+      if (unsubscribeDoc) unsubscribeDoc();
+
       if (user) {
         const userRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userRef);
-        const userData = userDoc.data();
-        setUserName(userData?.displayName || user.email || 'User');
-        // groups
-        if (userData?.groupId) {
-          setUserGroupIds(userData.groupId);
-        }
-        // google fit flag
-        setGoogleFitAuthorized(userData?.googleFitAuthorized ?? false);
+
+        // 2) Real-time listener on the user doc
+        unsubscribeDoc = onSnapshot(userRef, (snap) => {
+          const data = snap.data() || {};
+
+          // displayName
+          setUserName(data.displayName || user.email || 'User');
+
+          // groupIds (support both singular/groupIds)
+          const groups: string[] = data.groupIds
+            || (data.groupId ? [data.groupId] : []);
+          setUserGroupIds(groups);
+
+          // googleFitAuthorized flag
+          setGoogleFitAuthorized(!!data.googleFitAuthorized);
+        });
       }
-      setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeDoc) unsubscribeDoc();
+    };
   }, []);
 
-  // (Optional) Fetch fresh user doc whenever currentUser changes
-  useEffect(() => {
-    if (!currentUser) return;
-
-    (async () => {
-      const userRef = doc(db, 'users', currentUser.uid);
-      const snap = await getDoc(userRef);
-      const data = snap.data();
-      if (data) {
-        setUserName(data.displayName || currentUser.email || 'User');
-        const groups: string[] =
-          data.groupIds ||
-          (data.groupId ? [data.groupId] : []);
-        setUserGroupIds(groups);
-        setGoogleFitAuthorized(data.googleFitAuthorized ?? false);
-      }
-      setLoading(false);
-    })();
-  }, [currentUser]);
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate('/login');
-  };
-
+  // Leave group handler remains the same
   const handleLeaveGroup = async (groupId: string) => {
     if (!currentUser) return;
 
-    // remove from group membership subcollection
+    // remove membership doc
     await setDoc(
       doc(db, 'groups', groupId, 'members', currentUser.uid),
       {},
       { merge: false }
     );
-    // update user doc
+
+    // remove from user.groupIds
     const userRef = doc(db, 'users', currentUser.uid);
     const userSnap = await getDoc(userRef);
     const currentGroups: string[] = userSnap.data()?.groupIds || [];
     const updated = currentGroups.filter((id) => id !== groupId);
     await setDoc(userRef, { groupIds: updated }, { merge: true });
     setUserGroupIds(updated);
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate('/login');
   };
 
   if (loading) return null;
@@ -113,7 +104,6 @@ export default function DashboardPage() {
       <h2 className="announcement">
         This page is in test mode! Coming soon...stats and other stuff
       </h2>
-
 
       {currentUser && userGroupIds.length > 0 && (
         <div className="streak-box">
@@ -137,11 +127,11 @@ export default function DashboardPage() {
                 groupId={groupId}
                 selectedDate={''}
                 showFitness={false}
-                />
+              />
               <button
                 onClick={() => handleLeaveGroup(groupId)}
-                className='cancel'
-                >
+                className="cancel"
+              >
                 Leave Group
               </button>
             </div>
@@ -151,14 +141,14 @@ export default function DashboardPage() {
 
       {currentUser && (
         <GroupSelector
-        user={{
-          uid: currentUser.uid,
-          displayName: currentUser.displayName || '',
-          profilePicUrl: currentUser.photoURL || '',
-        }}
-        onGroupJoined={(newGroupId) => {
-          setUserGroupIds((prev) => [...new Set([...prev, newGroupId])]);
-        }}
+          user={{
+            uid: currentUser.uid,
+            displayName: currentUser.displayName || '',
+            profilePicUrl: currentUser.photoURL || '',
+          }}
+          onGroupJoined={(newGroupId) => {
+            setUserGroupIds((prev) => [...new Set([...prev, newGroupId])]);
+          }}
         />
       )}
 
@@ -169,6 +159,7 @@ export default function DashboardPage() {
       {currentUser && googleFitAuthorized && (
         <GoogleFitDisconnect onDisconnect={() => setGoogleFitAuthorized(false)} />
       )}
+
       <button
         style={{ marginBottom: '60px' }}
         onClick={handleLogout}

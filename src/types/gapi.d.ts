@@ -4,10 +4,7 @@ declare global {
   interface GapiClientFitness {
     users: {
       dataset: {
-        aggregate: (params: {
-          userId: string;
-          resource: any;
-        }) => Promise<any>;
+        aggregate: (params: { userId: string; resource: any }) => Promise<any>;
       };
     };
   }
@@ -22,5 +19,14 @@ declare global {
 
   namespace gapi {
     const client: GapiClient;
+  }
+
+  declare namespace gapi.client {
+    function init(config: {
+      apiKey: string;
+      clientId: string;
+      scope: string;
+      discoveryDocs: string[];
+    }): Promise<void>;
   }
 }

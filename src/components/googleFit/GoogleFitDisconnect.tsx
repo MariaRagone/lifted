@@ -1,37 +1,79 @@
 // src/components/GoogleFitDisconnect.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { gapi } from 'gapi-script';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../library/firebase';
-import '../Buttons.css'
+import '../Buttons.css';
 
+const CLIENT_ID     = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const API_KEY       = import.meta.env.VITE_GOOGLE_API_KEY;
+const SCOPES        = 'https://www.googleapis.com/auth/fitness.activity.read';
+const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/fitness/v1/rest';
 
 interface Props {
   onDisconnect: () => void;
 }
 
 const GoogleFitDisconnect: React.FC<Props> = ({ onDisconnect }) => {
+  const [gapiReady, setGapiReady] = useState(false);
+
+  // Load & init gapi.client + auth2 once on mount
+  useEffect(() => {
+    const initGapi = async () => {
+      try {
+        await new Promise<void>(res => gapi.load('client:auth2', res));
+        await (gapi.client as any).init({
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          scope: SCOPES,
+          discoveryDocs: [DISCOVERY_DOC],
+        });
+        setGapiReady(true);
+      } catch (err) {
+        console.error('Failed to initialize Google API', err);
+      }
+    };
+    initGapi();
+  }, []);
+
   const handleDisconnect = async () => {
-    const authInstance = gapi.auth2.getAuthInstance();
-    // revoke the granted scopes and sign the user out of Google Fit
-    await authInstance.disconnect();
+    try {
+      if (!gapiReady) {
+        console.warn('Google API not yet initialized');
+      }
 
-    // mark in Firestore that they’re no longer connected
-    if (auth.currentUser) {
-      await setDoc(
-        doc(db, 'users', auth.currentUser.uid),
-        { googleFitAuthorized: false },
-        { merge: true }
-      );
+      const authInstance = gapi.auth2.getAuthInstance();
+      if (authInstance) {
+        // revoke scopes
+        await authInstance.disconnect();
+        // also sign out
+        await authInstance.signOut();
+      }
+
+      // update Firestore flag
+      if (auth.currentUser) {
+        await setDoc(
+          doc(db, 'users', auth.currentUser.uid),
+          { googleFitAuthorized: false },
+          { merge: true }
+        );
+      }
+
+      // inform parent
+      onDisconnect();
+    } catch (err) {
+      console.error('Error disconnecting from Google Fit', err);
     }
-
-    onDisconnect();
   };
 
   return (
-      <button onClick={handleDisconnect} className="cancel">
-        Disconnect from Google Fit
-      </button>
+    <button
+      onClick={handleDisconnect}
+      className="cancel"
+      disabled={!gapiReady}
+    >
+      Disconnect from Google Fit
+    </button>
   );
 };
 

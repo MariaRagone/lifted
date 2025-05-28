@@ -4,7 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../library/firebase';
 import './DeployToast.css';
 
-const APP_VERSION = '2025-05-27-v1';
+const APP_VERSION = '2025-05-28-v1';
 
 const DeployToast: React.FC = () => {
   const [show, setShow] = useState(false);
@@ -43,8 +43,8 @@ const DeployToast: React.FC = () => {
     <div className="deploy-toast">
       <strong>🚀 What's New:</strong>
       <ul>
-        <li>📣 Fixed Google Fit bugs</li>
-        <li>📣 Connect/disconnect Google Fit buttons on dashboard</li>
+        <li>📣 UI updates</li>
+        <li>📣 Fix a Google Fit Bug</li>
 
       </ul>
       <button onClick={dismissToast} className="toast-close">Got it</button>

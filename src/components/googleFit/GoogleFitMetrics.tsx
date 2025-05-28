@@ -61,42 +61,27 @@ const GoogleFitMetrics: React.FC<Props> = ({ selectedDate }) => {
     );
   };
 
-  useEffect(() => {
-    let intervalId: number;
+useEffect(() => {
+  let intervalId: number;
 
-    const initAndFetch = async () => {
-      // 1) load gapi client + auth2
-      await new Promise<void>((res) =>
-        gapi.load('client:auth2', res)
-      );
+  const init = async () => {
+    await new Promise<void>(res => gapi.load('client:auth2', res));
+    await (gapi.client as any).init({ /* … */ });
+    await gapi.client.load('fitness', 'v1');
+  };
 
-      // 2) initialize with your keys & discovery
-      await gapi.client.init({
-        apiKey: API_KEY,
-        clientId: CLIENT_ID,
-        scope: SCOPES,
-        discoveryDocs: [DISCOVERY_DOC],
-      });
+  init()
+    .then(fetchGoogleFitData)
+    .then(() => {
+      // start polling no matter what
+      intervalId = window.setInterval(fetchGoogleFitData, 20_000);
+    })
+    .catch(console.error);
 
-      // 3) load the fitness namespace
-      await gapi.client.load('fitness', 'v1');
-
-      // 4) pull data immediately
-      await fetchGoogleFitData();
-
-      // 5) if it’s today, start polling every 20s
-      if (isSameDay(parseISO(selectedDate), new Date())) {
-        intervalId = window.setInterval(fetchGoogleFitData, 20_000);
-      }
-    };
-
-    initAndFetch();
-
-    return () => {
-      if (intervalId) window.clearInterval(intervalId);
-    };
-  }, [selectedDate]); // only re-run when the date changes
-
+  return () => {
+    if (intervalId) clearInterval(intervalId);
+  };
+}, []); // or [selectedDate]
   return (
     <div className="fitness-card">
       <h3>📊 Google Fit Metrics</h3>
