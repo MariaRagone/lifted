@@ -29,11 +29,9 @@ const GoogleFitDisconnect: React.FC<Props> = ({ onDisconnect }) => {
   };
 
   return (
-    <div className="fitness-card">
       <button onClick={handleDisconnect} className="cancel">
         Disconnect from Google Fit
       </button>
-    </div>
   );
 };
 

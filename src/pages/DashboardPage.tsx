@@ -114,13 +114,6 @@ export default function DashboardPage() {
         This page is in test mode! Coming soon...stats and other stuff
       </h2>
 
-      {currentUser && !googleFitAuthorized && (
-        <GoogleFitConnect onAuthorized={() => setGoogleFitAuthorized(true)} />
-      )}
-
-      {currentUser && googleFitAuthorized && (
-        <GoogleFitDisconnect onDisconnect={() => setGoogleFitAuthorized(false)} />
-      )}
 
       {currentUser && userGroupIds.length > 0 && (
         <div className="streak-box">
@@ -144,11 +137,11 @@ export default function DashboardPage() {
                 groupId={groupId}
                 selectedDate={''}
                 showFitness={false}
-              />
+                />
               <button
                 onClick={() => handleLeaveGroup(groupId)}
                 className='cancel'
-              >
+                >
                 Leave Group
               </button>
             </div>
@@ -158,17 +151,24 @@ export default function DashboardPage() {
 
       {currentUser && (
         <GroupSelector
-          user={{
-            uid: currentUser.uid,
-            displayName: currentUser.displayName || '',
-            profilePicUrl: currentUser.photoURL || '',
-          }}
-          onGroupJoined={(newGroupId) => {
-            setUserGroupIds((prev) => [...new Set([...prev, newGroupId])]);
-          }}
+        user={{
+          uid: currentUser.uid,
+          displayName: currentUser.displayName || '',
+          profilePicUrl: currentUser.photoURL || '',
+        }}
+        onGroupJoined={(newGroupId) => {
+          setUserGroupIds((prev) => [...new Set([...prev, newGroupId])]);
+        }}
         />
       )}
 
+      {currentUser && !googleFitAuthorized && (
+        <GoogleFitConnect onAuthorized={() => setGoogleFitAuthorized(true)} />
+      )}
+
+      {currentUser && googleFitAuthorized && (
+        <GoogleFitDisconnect onDisconnect={() => setGoogleFitAuthorized(false)} />
+      )}
       <button
         style={{ marginBottom: '60px' }}
         onClick={handleLogout}
