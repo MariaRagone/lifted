@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from '../library/firebase';
 import { getInitials } from '../utilities/userHelpers';
+import './GroupMembers.css';
 
 interface GroupMembersProps {
   groupId: string;

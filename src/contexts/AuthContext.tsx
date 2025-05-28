@@ -1,29 +1,34 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import type { User } from 'firebase/auth';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth, db } from '../library/firebase';
-import { doc, setDoc } from 'firebase/firestore';
-import App from '../App';
+// src/contexts/AuthContext.tsx
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import type { User } from 'firebase/auth'
+import { onAuthStateChanged } from 'firebase/auth'
+import { auth, db } from '../library/firebase'
+import { doc, setDoc } from 'firebase/firestore'
 
 interface AuthContextType {
-  currentUser: User | null;
+  currentUser: User | null
+  loading: boolean
 }
 
-const AuthContext = createContext<AuthContextType>({ currentUser: null });
+const AuthContext = createContext<AuthContextType>({
+  currentUser: null,
+  loading: true
+})
 
 export function useAuth() {
-  return useContext(AuthContext);
+  return useContext(AuthContext)
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
+      setCurrentUser(user)
       if (user) {
-        const { uid, displayName, photoURL, email } = user;
-        const name = displayName || email?.split('@')[0] || 'User';
+        const { uid, displayName, photoURL, email } = user
+        const name = displayName || email?.split('@')[0] || 'User'
 
         await setDoc(
           doc(db, 'users', uid),
@@ -32,16 +37,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             profilePicUrl: photoURL ?? '',
           },
           { merge: true }
-        );
+        )
       }
-    });
+      setLoading(false)
+    })
 
-    return () => unsubscribe();
-  }, []);
+    return unsubscribe
+  }, [])
 
   return (
-    <AuthContext.Provider value={{ currentUser }}>
+    <AuthContext.Provider value={{ currentUser, loading }}>
       {children}
     </AuthContext.Provider>
-  );
+  )
 }
