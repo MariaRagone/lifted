@@ -1,0 +1,63 @@
+.fitness-card {
+  background-color: #e0fafd;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 6px 14px;
+  margin: 10px 0;
+  font-family: "Inter", sans-serif;
+  color: #333;
+  max-width: 300px;
+}
+
+.fitness-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 1.1rem;
+}
+
+.fitness-row:last-child {
+  margin-bottom: 0;
+}
+
+.icon {
+  margin-right: 10px;
+  font-size: 1.5rem;
+}
+
+.label {
+  flex-grow: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #093d44;
+}
+
+.value {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #f1a84d; /* accent color for heart / steps */
+}
+
+@media (max-width: 500px) {
+  .fitness-card {
+    padding: 16px;
+  }
+
+  .value {
+    font-size: 1.1rem;
+  }
+}
+.fitness-heading {
+  display: flex;
+  align-items: center;
+  padding-bottom: 6px;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #093d44;
+}
+
+.fitness-heading .icon {
+  font-size: 1.5rem;
+}
