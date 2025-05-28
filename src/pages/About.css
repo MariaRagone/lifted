@@ -36,11 +36,20 @@
   margin-bottom: 0.75rem;
 }
 
-.section-list {
+.section-bullets {
   list-style: disc;
   padding-left: 1.5rem;
 }
 
-.section-list li {
+.section-bullets li {
   margin-bottom: 0.5rem;
+}
+.section-list {
+  list-style: none;   /* remove bullets */
+  margin: 0;          /* reset default ul margin */
+  padding: 0;         /* reset default ul padding */
+}
+
+.section-list li {
+  margin-bottom: 8px; /* add vertical breathing room */
 }

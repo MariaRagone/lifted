@@ -14,11 +14,29 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* public */}
+        {/* public routes */}
         <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/about"
+          element={
+            <>
+              <AboutPage />
+              <BottomNavBar />
+            </>
+          }
+        />
+        <Route
+          path="/privacy"
+          element={
+            <>
+              <PrivacyPolicy />
+              <BottomNavBar />
+            </>
+          }
+        />
 
-        {/* everything below is protected */}
-        <Route element={<ProtectedRoute />}>
+        {/* protected routes */}
+        <Route element={<ProtectedRoute />}>        
           <Route
             path="/"
             element={
@@ -46,25 +64,7 @@ const App: React.FC = () => {
               </>
             }
           />
-          <Route
-            path="/about"
-            element={
-              <>
-                <AboutPage />
-                <BottomNavBar />
-              </>
-            }
-          />
-          <Route
-            path="/privacy"
-            element={
-              <>
-                <PrivacyPolicy />
-                <BottomNavBar />
-              </>
-            }
-          />
-
+          {/* catch-all for protected */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

@@ -1,6 +1,6 @@
 .group-members {
-  margin-top: 20px;
-  padding: 12px;
+  padding: 8px;
+  margin-left: -10px;
 }
 
 .member-list {
@@ -45,21 +45,134 @@
   gap: 15px;
   justify-content: space-evenly;
   align-items: center;
-  /* overflow-x: auto; */
   padding-bottom: 10px;
   width: 100%;
 }
-
 
 .community-checkins .user-checkin {
   display: flex;
   flex-direction: column;
   max-width: 20px;
 }
+
 .community-checkins .user-checkin img {
   width: 30px;
   height: 30px;
   background-color: #f7c890;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.loading-text {
+  text-align: center;
+  color: #888;
+  margin: 12px 0;
+}
+
+.group-name {
+  margin: 0 0 6px 20px;
+  font-size: 1rem;
+  color: #093d44;
+}
+
+.group-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;  
+  margin: 12px 0;        
+  width: 100%;            
+}
+
+.progress-bar-bg {
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  width: 90%;
+  max-width: 400px;
+}
+
+.progress-text {
+  font-size: 12px;
+  margin-top: 4px;
+  color: #093d44;
+}
+
+.community-checkins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: space-evenly;
+  align-items: center;
+  padding-bottom: 10px;
+  width: 100%;
+}
+
+.user-checkin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #f7c890;
+}
+
+.avatar-fallback {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #f7c890;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #093d44;
+}
+
+.checkmark {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: #4caf50;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between; /* push title left, button right */
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.leave-group-button {
+  padding: 2px 6px;
+  font-size: 8px;
+  background: transparent;
+  border: 1px solid #e05d5d;
+  color: #e05d5d;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.leave-group-button:hover {
+  background: #e05d5d;
+  color: white;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.progress-bar-fill.red {
+  background-color: #e05d5d;
+}
+.progress-bar-fill.yellow {
+  background-color: #f9b95c;
+}
+.progress-bar-fill.green {
+  background-color: #4caf50;
 }

@@ -7,6 +7,7 @@ import icon from '../assets/google-icon.png';
 import "../components/Buttons.css";
 import './Login.css';
 import Logo from '../components/Logo';
+import AppInfo from '../components/AppInfo';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const LoginPage = () => {
   
 
   return (
+    <>
     <div className="login-container">
         <Logo size={200}/>
         <button className="google-login-button" onClick={handleGoogleLogin}>
@@ -40,6 +42,9 @@ const LoginPage = () => {
         Sign in with Google
       </button>
     </div>
+
+      <AppInfo />
+      </>
   );
 };
 

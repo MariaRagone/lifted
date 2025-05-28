@@ -14,6 +14,7 @@ import GroupMembers from '../components/GroupMemembers';
 import devos from '../data/daily-lift-devotionals.json';
 import DeployToast from '../components/DeployToast';
 import GoogleFitMetrics from '../components/googleFit/GoogleFitMetrics';
+import Encourage from '../components/Encourage';
 
 interface DevotionalEntry {
   id: number;
@@ -329,14 +330,15 @@ useEffect(() => {
               groupId={groupId}
               selectedDate={selectedDate}
               showFitness={showFitness}
+              showProgress={true}
+              showCheckmarks={true}
+              showLeaveButton={false}
             />
           ))}
         </>
       )}
 
-      <p className="encourage">
-        Lift up your friends in prayer and encourage them to do their daily lift!
-      </p>
+      <Encourage />
     </div>
   );
 };

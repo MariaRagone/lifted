@@ -1,136 +1,135 @@
-import React, { useEffect, useState } from 'react';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
-import { db } from '../library/firebase';
-import { getInitials } from '../utilities/userHelpers';
-import './GroupMembers.css';
+// src/components/GroupMembers.tsx
+import React, { useEffect, useState, useCallback } from 'react'
+import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore'
+import { auth, db } from '../library/firebase'
+import { getInitials } from '../utilities/userHelpers'
+import './GroupMembers.css'
 
 interface GroupMembersProps {
-  groupId: string;
-  selectedDate: string;
-  showFitness: boolean;
+  groupId: string
+  selectedDate: string
+  showFitness: boolean
+  showProgress?: boolean       // whether to display the progress bar
+  showCheckmarks?: boolean     // whether to show ✓ on avatars
+  showLeaveButton?: boolean    // whether to render a "Leave Group" button
 }
 
 interface Member {
-  uid: string;
-  displayName?: string;
-  profilePicUrl?: string;
-  completed: boolean;
+  uid: string
+  displayName?: string
+  profilePicUrl?: string
+  completed: boolean
 }
 
 const DEFAULT_CHECKBOXES = {
   prayerDone: false,
   videoDone: false,
   otherFitnessDone: false,
-};
+}
 
-const GroupMembers: React.FC<GroupMembersProps> = ({ groupId, selectedDate, showFitness }) => {
-  const [members, setMembers] = useState<Member[]>([]);
-  const [groupName, setGroupName] = useState<string>(groupId);
-  const [loading, setLoading] = useState(true);
+const GroupMembers: React.FC<GroupMembersProps> = ({
+  groupId,
+  selectedDate,
+  showFitness,
+  showProgress = true,
+  showCheckmarks = true,
+  showLeaveButton = false,
+}) => {
+  const [members, setMembers] = useState<Member[]>([])
+  const [groupName, setGroupName] = useState<string>(groupId)
+  const [loading, setLoading] = useState(true)
+
+  const fetchGroupInfo = useCallback(async () => {
+    if (!groupId || !selectedDate) return
+    setLoading(true)
+    try {
+      const membersRef = collection(db, 'groups', groupId, 'members')
+      const snapshot = await getDocs(membersRef)
+
+      const results = await Promise.all(
+        snapshot.docs.map(async (docSnap) => {
+          const uid = docSnap.id
+          const { displayName, profilePicUrl } = docSnap.data()
+          const cbSnap = await getDoc(doc(db, 'days', selectedDate, 'checkboxes', uid))
+          const cb = cbSnap.exists() ? (cbSnap.data() as any) : DEFAULT_CHECKBOXES
+          const completed = cb.prayerDone && (showFitness ? (cb.videoDone || cb.otherFitnessDone) : true)
+          return { uid, displayName, profilePicUrl, completed }
+        })
+      )
+      setMembers(results)
+      const groupDoc = await getDoc(doc(db, 'groups', groupId))
+      if (groupDoc.exists()) {
+        const data = groupDoc.data() as any
+        if (data.name) setGroupName(data.name)
+      }
+    } catch (err) {
+      console.error('Error loading group members:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [groupId, selectedDate, showFitness])
 
   useEffect(() => {
-    if (!groupId || !selectedDate) return;
+    fetchGroupInfo()
+  }, [fetchGroupInfo])
 
-    const fetchGroupInfo = async () => {
-      setLoading(true);
-      try {
-        // Fetch members
-        const membersRef = collection(db, 'groups', groupId, 'members');
-        const snapshot = await getDocs(membersRef);
-
-        const results = await Promise.all(
-          snapshot.docs.map(async (docSnap) => {
-            const uid = docSnap.id;
-            const { displayName, profilePicUrl } = docSnap.data();
-
-const cbSnap = await getDoc(doc(db, 'days', selectedDate, 'checkboxes', uid));
-
-            const cb = cbSnap.exists() ? cbSnap.data() : DEFAULT_CHECKBOXES;
-            const completed =
-              cb.prayerDone && (showFitness ? (cb.videoDone || cb.otherFitnessDone) : true);
-
-            return { uid, displayName, profilePicUrl, completed };
-          })
-        );
-
-        setMembers(results);
-
-        // Fetch group name
-        const groupDoc = await getDoc(doc(db, 'groups', groupId));
-        if (groupDoc.exists()) {
-          const data = groupDoc.data();
-          if (data?.name) setGroupName(data.name);
-        }
-      } catch (err) {
-        console.error('Error loading group members:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGroupInfo();
-  }, [groupId, selectedDate, showFitness]);
-
-  if (!groupId || loading) {
-    return (
-      <p style={{ textAlign: 'center', color: '#888' }}>
-        Loading Lift Circle...
-      </p>
-    );
+  const handleLeaveGroup = async () => {
+    const user = auth.currentUser
+    if (!user) return
+    await setDoc(doc(db, 'groups', groupId, 'members', user.uid), {}, { merge: false })
+    const userRef = doc(db, 'users', user.uid)
+    const userSnap = await getDoc(userRef)
+    const currentGroups: string[] = userSnap.data()?.groupIds || []
+    const updated = currentGroups.filter((id) => id !== groupId)
+    await setDoc(userRef, { groupIds: updated }, { merge: true })
+    fetchGroupInfo()
   }
 
-  const completedCount = members.filter((m) => m.completed).length;
-  const progressPercent = members.length > 0 ? (completedCount / members.length) * 100 : 0;
+  if (loading) return <p className="loading-text">Loading Lift Circle…</p>
 
-  const getBarColor = (percent: number) => {
-    if (percent === 100) return '#4caf50';
-    if (percent >= 60) return '#f9b95c';
-    return '#e05d5d';
-  };
+  const completedCount = members.filter((m) => m.completed).length
+  const progressPercent = members.length > 0 ? (completedCount / members.length) * 100 : 0
+
+  const progressClass =
+    progressPercent === 100 ? 'green' :
+    progressPercent >= 60 ? 'yellow' :
+    'red'
 
   return (
     <div className="group-members">
-      <h4 style={{ marginLeft: '20px', marginBottom: '6px' }}>{groupName}</h4>
-
-      <div style={{ marginLeft: '20px', marginBottom: '12px' }}>
-        <div
-          style={{
-            height: '8px',
-            background: '#e0e0e0',
-            borderRadius: '4px',
-            overflow: 'hidden',
-            width: '90%',
-            maxWidth: '400px',
-          }}
-        >
-          <div
-            style={{
-              width: `${progressPercent}%`,
-              height: '100%',
-              backgroundColor: getBarColor(progressPercent),
-              transition: 'width 0.4s ease',
-            }}
-          />
-        </div>
-        <p style={{ fontSize: '12px', marginTop: '4px', color: '#093d44' }}>
-          ✅ {completedCount} of {members.length} completed
-        </p>
+      <div className="group-header">
+        <h4 className="group-name">{groupName}</h4>
+        {showLeaveButton && (
+          <button className="leave-group-button" onClick={handleLeaveGroup}>Leave</button>
+        )}
       </div>
+
+      {showProgress && (
+        <div className="group-progress">
+          <div className="progress-bar-bg">
+            <div
+              className={`progress-bar-fill ${progressClass}`}
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <p className="progress-label">{completedCount} of {members.length} completed</p>
+        </div>
+      )}
 
       <div className="community-checkins">
         {members.map(({ uid, displayName, profilePicUrl, completed }) => (
           <div key={uid} className="user-checkin">
             {profilePicUrl ? (
-              <img src={profilePicUrl} alt={displayName ?? 'User'} />
+              <img className="avatar" src={profilePicUrl} alt={displayName} />
             ) : (
               <div className="avatar-fallback">{getInitials(displayName)}</div>
             )}
-            {completed && <span className="checkmark">✓</span>}
+            {showCheckmarks && completed && <span className="checkmark">✓</span>}
           </div>
         ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default GroupMembers;
+export default GroupMembers

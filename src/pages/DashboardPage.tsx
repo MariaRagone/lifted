@@ -10,6 +10,8 @@ import GroupMembers from '../components/GroupMemembers';
 import '../components/Buttons.css';
 import GoogleFitConnect from '../library/GoogleFitConnect';
 import GoogleFitDisconnect from '../components/googleFit/GoogleFitDisconnect';
+import { format } from 'date-fns'
+import Encourage from '../components/Encourage';
 
 interface UserStatus {
   uid: string;
@@ -32,30 +34,24 @@ export default function DashboardPage() {
   useEffect(() => {
     let unsubscribeDoc: Unsubscribe | undefined;
 
-    // 1) Auth listener
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
 
-      // tear down any previous doc listener
       if (unsubscribeDoc) unsubscribeDoc();
 
       if (user) {
         const userRef = doc(db, 'users', user.uid);
 
-        // 2) Real-time listener on the user doc
         unsubscribeDoc = onSnapshot(userRef, (snap) => {
           const data = snap.data() || {};
 
-          // displayName
           setUserName(data.displayName || user.email || 'User');
 
-          // groupIds (support both singular/groupIds)
           const groups: string[] = data.groupIds
             || (data.groupId ? [data.groupId] : []);
           setUserGroupIds(groups);
 
-          // googleFitAuthorized flag
           setGoogleFitAuthorized(!!data.googleFitAuthorized);
         });
       }
@@ -67,18 +63,15 @@ export default function DashboardPage() {
     };
   }, []);
 
-  // Leave group handler remains the same
   const handleLeaveGroup = async (groupId: string) => {
     if (!currentUser) return;
 
-    // remove membership doc
     await setDoc(
       doc(db, 'groups', groupId, 'members', currentUser.uid),
       {},
       { merge: false }
     );
 
-    // remove from user.groupIds
     const userRef = doc(db, 'users', currentUser.uid);
     const userSnap = await getDoc(userRef);
     const currentGroups: string[] = userSnap.data()?.groupIds || [];
@@ -116,29 +109,29 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {currentUser && userGroupIds.length > 0 && (
-        <>
-          <h3 style={{ marginLeft: '20px' }}>
-            {userGroupIds.length > 1 ? 'My Lift Circles' : 'My Lift Circle'}
-          </h3>
-          {userGroupIds.map((groupId) => (
-            <div key={groupId} style={{ marginBottom: '20px' }}>
-              <GroupMembers
-                groupId={groupId}
-                selectedDate={''}
-                showFitness={false}
-              />
-              <button
-                onClick={() => handleLeaveGroup(groupId)}
-                className="cancel"
-              >
-                Leave Group
-              </button>
-            </div>
-          ))}
-        </>
-      )}
+{currentUser && userGroupIds.length > 0 && (
+  <>
+    <h3 style={{ marginLeft: '20px' }}>
+      {userGroupIds.length > 1 ? 'My Lift Circles' : 'My Lift Circle'}
+    </h3>
 
+    {userGroupIds.map((groupId) => (
+      <div key={groupId} style={{ marginBottom: '20px' }}>
+       <GroupMembers
+          groupId={groupId}
+          selectedDate={format(new Date(), 'yyyy-MM-dd')}
+          showFitness={false}
+          showProgress={false}
+          showCheckmarks={false}
+          showLeaveButton={true}
+        />
+      </div>
+    ))}
+    
+      <Encourage />
+  </>
+  
+)}
       {currentUser && (
         <GroupSelector
           user={{
