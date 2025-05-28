@@ -11,7 +11,6 @@ import Devotional from '../components/Devotional';
 import Logo from '../components/Logo';
 import GroupSelector from '../components/GroupSelector'; 
 import GroupMembers from '../components/GroupMemembers';
-import ActivitySummary from '../components/GoogleFitSummary';
 
 interface UserStatus {
   uid: string;
