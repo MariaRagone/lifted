@@ -13,6 +13,7 @@ import Devotional from '../components/Devotional';
 import Logo from '../components/Logo';
 import GroupSelector from '../components/GroupSelector';
 import GroupMembers from '../components/GroupMemembers';
+import '../components/Buttons.css';
 
 import GoogleFitConnect from '../library/GoogleFitConnect';
 import GoogleFitDisconnect from '../components/googleFit/GoogleFitDisconnect';
@@ -146,16 +147,7 @@ export default function DashboardPage() {
               />
               <button
                 onClick={() => handleLeaveGroup(groupId)}
-                style={{
-                  marginLeft: '20px',
-                  backgroundColor: '#e05d5d',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '6px 12px',
-                  color: 'white',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                }}
+                className='cancel'
               >
                 Leave Group
               </button>
@@ -180,7 +172,7 @@ export default function DashboardPage() {
       <button
         style={{ marginBottom: '60px' }}
         onClick={handleLogout}
-        className="logout-button"
+        className="btn-primary"
       >
         Log Out
       </button>

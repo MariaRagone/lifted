@@ -3,6 +3,8 @@ import React from 'react';
 import { gapi } from 'gapi-script';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../library/firebase';
+import '../Buttons.css'
+
 
 interface Props {
   onDisconnect: () => void;
@@ -28,7 +30,7 @@ const GoogleFitDisconnect: React.FC<Props> = ({ onDisconnect }) => {
 
   return (
     <div className="fitness-card">
-      <button onClick={handleDisconnect} className="disconnect-btn">
+      <button onClick={handleDisconnect} className="cancel">
         Disconnect from Google Fit
       </button>
     </div>

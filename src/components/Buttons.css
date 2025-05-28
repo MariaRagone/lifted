@@ -16,17 +16,41 @@
 .btn-primary {
   background-color: #093d44; 
   color: #ffffff;
+  margin-left: 20px;
+  border: none;
+  padding: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 10px;
 }
 
 .btn-primary:hover {
-  background-color: #1a4045;
+  background-color: #f1a84d;
 }
 
 .btn-secondary {
   background-color: #f1a84d;
-  color: #333;
-}
+  margin-left: 20px;
+  border: none;
+  padding: 12px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 10px;}
 
 .btn-secondary:hover {
-  background-color: #f4d4ae;
+  background-color: #093d44;
 }
+
+.cancel {
+  margin-left: 20px;
+  background-color: #e05d5d;
+  border: none;
+  padding: 12px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 10px;
+}
+                 
+             
