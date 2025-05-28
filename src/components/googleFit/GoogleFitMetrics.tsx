@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { gapi } from 'gapi-script';
 import { isSameDay, parseISO } from 'date-fns';
+import './GoogleFitMetrics.css';
 /// <reference types="gapi.client" />
 /// <reference types="gapi.client.fitness" />
 /// <reference types="gapi.auth2" />
