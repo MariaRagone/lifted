@@ -1,5 +1,6 @@
 import React from 'react';
 import './About.css';
+import { Link } from 'react-router-dom';
 
 const AboutPage: React.FC = () => {
   return (
@@ -8,6 +9,7 @@ const AboutPage: React.FC = () => {
       <p className="about-subheading">
       Your daily devotional & fitness companion. Strengthen your faith, energize your body, and lift up your community.
       </p>
+     
 
       <section className="about-section">
         <h2 className="section-title">What is Daily Lift?</h2>
@@ -42,6 +44,10 @@ const AboutPage: React.FC = () => {
           <li>Anyone seeking to honor God with their body and soul</li>
         </ul>
       </section>
+
+      <Link to="/login" className="btn-primary about-cta">
+      Get Started
+    </Link>
     </div>
   );
 };

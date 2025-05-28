@@ -1,6 +1,8 @@
 .group-members {
   padding: 8px;
+  padding-top: 0px;
   margin-left: -10px;
+  max-width: 500px;
 }
 
 .member-list {

@@ -1,0 +1,18 @@
+.weekly-fit-stats {
+  margin-bottom: 24px;
+}
+
+.weekly-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+.weekly-table th,
+.weekly-table td {
+  padding: 8px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 0.9rem;
+}
+.weekly-table tfoot td {
+  border-top: 2px solid #093d44;
+}

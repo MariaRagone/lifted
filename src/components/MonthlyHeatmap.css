@@ -1,0 +1,61 @@
+.monthly-heatmap {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.mh-title {
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 1.25rem;
+  color: #093d44;
+}
+
+.mh-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.mh-weekday {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #555;
+}
+
+.mh-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.mh-day {
+  position: relative;
+  padding-top: 100%;   /* square */
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.mh-day.empty {
+  background: transparent;
+}
+
+.mh-day.done {
+  background-color: #f9b95c;  /* completed color */
+}
+
+.mh-day.not-done {
+  background-color: #e0e0e0;  /* uncompleted color */
+}
+
+.mh-day-label {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  font-size: 0.75rem;
+  color: #093d44;
+}
+
+h2 {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #f9b95c;
+}

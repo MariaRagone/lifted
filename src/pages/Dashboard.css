@@ -1,6 +1,6 @@
 .container {
   padding: 2rem;
-  max-width: 800px;
+  max-width: 500px;
   margin: 0 auto;
   font-family: 'Inter', sans-serif;
   margin-bottom: 400px;
@@ -13,13 +13,32 @@
 }
 
 .welcome {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
-  color: #333;
+  color: #093d44;
   font-weight: 600;
 }
 
+h1 {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #f9b95c;
+}
+
+h3 {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #f9b95c;
+}
+
+h4 {
+  margin-left: 20px;
+  font-size: 12px;
+  color: #093d44;
+  font-weight: 200px;
+}
+
 .announcement {
-  color: #f1a84d;
+  color: #e74c3c;
+    text-align: center;
 }
 
 .streak-box {
@@ -46,4 +65,43 @@
 
 .logout-button:hover {
   background-color: #c0392b;
+}
+
+.container {
+  padding: 20px;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.section-box {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.section-title {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 1.25rem;
+  color: #093d44;
+}
+
+.circle-card {
+  margin-bottom: 16px;
+  
+}
+
+.fit-section {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.logout-section {
+  text-align: center;
+  margin-bottom: 40px;
 }

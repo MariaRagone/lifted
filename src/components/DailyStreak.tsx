@@ -1,6 +1,7 @@
 import React from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { format, subDays } from 'date-fns';
+import './DailyStreak.css'
 
 interface DailyStreakProps {
   completedDates: string[];
@@ -28,7 +29,7 @@ return (
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="date"
-              tickFormatter={(tick: string) => tick.slice(5)}
+              // tickFormatter={(tick: string) => tick.slice(5)}
               interval={4}
               fontSize={10}
             />
