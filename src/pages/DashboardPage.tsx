@@ -11,6 +11,7 @@ import Devotional from '../components/Devotional';
 import Logo from '../components/Logo';
 import GroupSelector from '../components/GroupSelector'; 
 import GroupMembers from '../components/GroupMemembers';
+import GoogleFitConnect from '../library/GoogleFitConnect';
 
 interface UserStatus {
   uid: string;
@@ -100,6 +101,8 @@ useEffect(() => {
     <h1 className='welcome'>Welcome, {userName}!</h1>
     <h2 className='announcement'>This page is in test mode! Coming soon...stats and other stuff</h2>
 
+    <GoogleFitConnect onAuthorized={() => console.log("Google Fit connected")} />
+
 
     {currentUser && userGroupIds && (
       <div className='streak-box'>
@@ -107,7 +110,7 @@ useEffect(() => {
  {/* <DailyStreak completedDates={completedDates} /> */}
       {/* <StreakHeatmap completedDates={new Set(completedDates)} /> */}      </div>
     )}
-    <ActivitySummary steps={10234} heartPoints={10} />
+    {/* <ActivitySummary steps={10234} heartPoints={10} /> */}
 
 {currentUser && userGroupIds.length > 0 && (
   <>

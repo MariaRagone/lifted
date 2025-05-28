@@ -13,7 +13,7 @@ import Logo from '../components/Logo';
 import GroupMembers from '../components/GroupMemembers';
 import devos from '../data/daily-lift-devotionals.json';
 import DeployToast from '../components/DeployToast';
-import GoogleFitConnect from '../library/GoogleFitConnect';
+import GoogleFitMetrics from '../components/googleFit/GoogleFitMetrics';
 
 interface DevotionalEntry {
   id: number;
@@ -54,11 +54,19 @@ const DailyLiftPage: React.FC = () => {
   const [userGroupIds, setUserGroupIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [stepCount, setStepCount] = useState<number | null>(null);
+  const [googleFitAuthorized, setGoogleFitAuthorized] = useState(false);
 
+const allDates = generateDateRange(-30, 5);
+const showFitness = isFitnessDay(selectedDate);
+const todayDevo = devos.find((d) => d.date === selectedDate) as DevotionalEntry | undefined;
+useEffect(() => {
+  if (!currentUser) return;
+  const ref = doc(db, 'users', currentUser.uid);
+  getDoc(ref).then(snap => {
+    setGoogleFitAuthorized(snap.exists() && snap.data()?.googleFitAuthorized);
+  });
+}, [currentUser]);
 
-  const allDates = generateDateRange(-30, 5);
-  const showFitness = isFitnessDay(selectedDate);
-  const todayDevo = devos.find((d) => d.date === selectedDate) as DevotionalEntry | undefined;
   
 useEffect(() => {
   if (!currentUser) return;
@@ -308,6 +316,9 @@ useEffect(() => {
         onChange={(e) => saveCheckboxes({ otherFitnessNote: e.target.value })}
       />
 
+{googleFitAuthorized && (
+  <GoogleFitMetrics selectedDate={selectedDate} />
+)}
 
       {!loading && userGroupIds.length > 0 && (
         <>
