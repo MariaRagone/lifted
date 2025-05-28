@@ -1,36 +1,22 @@
+// src/main.tsx
 import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import App from './App'
-import Login from './pages/LoginPage'
-import DashboardPage from './pages/DashboardPage'
-import ProtectedRoute from './pages/ProtectedRoute'
-import DailyLiftPage from './pages/DailyLiftPage'
-import BottomNavBar from './components/BottomNavBar'
-import FavoritesPage from './pages/FavoritesPage'
-import PrivacyPolicy from './pages/PrivacyPolicy'
+import { createRoot } from 'react-dom/client'
+import { PostHogProvider } from 'posthog-js/react'
 import { AuthProvider } from './contexts/AuthContext'
-import AboutPage from './pages/AboutPage'
+import App from './App'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const container = document.getElementById('root')!
+const posthogOptions = { api_host: import.meta.env.VITE_POSTHOG_HOST! }
+
+createRoot(container).render(
   <React.StrictMode>
-    <AuthProvider>
-
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/devotional" element={<DailyLiftPage />} />
-        <Route path="/favorites" element={<FavoritesPage />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/about" element={<AboutPage />} />
-
-
-
-      </Routes>
-      <BottomNavBar />
-    </BrowserRouter>
-    </AuthProvider>
-  </React.StrictMode>,
+    <PostHogProvider
+      apiKey={import.meta.env.VITE_POSTHOG_KEY!}
+      options={posthogOptions}
+    >
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </PostHogProvider>
+  </React.StrictMode>
 )

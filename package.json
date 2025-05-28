@@ -17,6 +17,7 @@
     "gapi-script": "^1.2.0",
     "lucide-react": "^0.511.0",
     "node-fetch": "^3.3.2",
+    "posthog-js": "^1.248.0",
     "react": "^19.1.0",
     "react-calendar-heatmap": "^1.10.0",
     "react-dom": "^19.1.0",

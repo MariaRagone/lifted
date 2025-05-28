@@ -31,3 +31,9 @@
   font-size: 1.25rem;
   margin-right: 0.5rem;
 }
+
+.last-sync {
+  margin-top: 10px;
+  font-size: 8px;
+  color: #093d44
+}
