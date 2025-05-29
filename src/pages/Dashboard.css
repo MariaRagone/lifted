@@ -84,12 +84,6 @@ h4 {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* .section-title {
-  margin-top: 0;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: #093d44;
-} */
 
 .circle-card {
   margin-bottom: 16px;
@@ -104,4 +98,27 @@ h4 {
 .logout-section {
   text-align: center;
   margin-bottom: 40px;
+}
+
+.month-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.month-nav button {
+  background: none;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid #f9b95c;
+  color: #f9b95c;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.month-nav button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

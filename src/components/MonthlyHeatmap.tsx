@@ -4,12 +4,13 @@ import {  FaPrayingHands, FaMedal } from 'react-icons/fa'
 import './MonthlyHeatmap.css'
 
 type Props = {
+  viewDate: Date;
   completedDates: Set<string>;
   prayerDates:    Set<string>;
   fitnessDates:   Set<string>;
 }
 
-export default function MonthlyHeatmap({ completedDates, prayerDates, fitnessDates }: Props) {
+export default function MonthlyHeatmap({ viewDate, completedDates, prayerDates, fitnessDates }: Props) {
   const today = new Date()
   const start = startOfMonth(today)
   const end = endOfMonth(today)
@@ -17,6 +18,7 @@ export default function MonthlyHeatmap({ completedDates, prayerDates, fitnessDat
 
 const weeks: (Date | null)[][] = []
   let currentWeek: (Date | null)[] = []
+
   for (let i = 0; i < getDay(start); i++) {
     currentWeek.push(null)
   }
@@ -34,7 +36,7 @@ const weeks: (Date | null)[][] = []
 
   return (
     <div className="monthly-heatmap">
-      <h2 className="mh-title">{format(today, 'MMMM yyyy')}</h2>
+      <h2 className="mh-title">{format(viewDate, 'MMMM yyyy')}</h2>
       <div className="mh-weekdays">
         {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map((wd) => (
           <div key={wd} className="mh-weekday">{wd}</div>

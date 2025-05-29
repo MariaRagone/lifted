@@ -45,7 +45,7 @@ const DeployToast: React.FC = () => {
       <ul>
         <li>📣 Can see completed icons on calendar. </li>
         <li>📣 Confetti for completed dates</li>
-        <li>📣 Fix nav bar to stay fixed at bottom</li>
+        <li>📣 Fix nav bar to stay fixed at bottomc</li>
       </ul>
       <button onClick={dismissToast} className="toast-close">Got it</button>
 

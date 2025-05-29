@@ -1,19 +1,15 @@
-import React, { useEffect, useState } from 'react'
+// src/pages/DashboardPage.tsx
+import React, { useEffect, useState, useMemo } from 'react'
 import { onAuthStateChanged, signOut, User } from 'firebase/auth'
-import {
-  onSnapshot,
-  doc,
-  Unsubscribe,
-  getDoc,
-  setDoc
-} from 'firebase/firestore'
+import { onSnapshot, doc, Unsubscribe, getDoc, setDoc } from 'firebase/firestore'
 import { auth, db } from '../library/firebase'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   format,
   startOfMonth,
   endOfMonth,
-  eachDayOfInterval
+  eachDayOfInterval,
+  addMonths
 } from 'date-fns'
 import { isFitnessDay } from '../utilities/dateHelpers'
 
@@ -34,16 +30,19 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState('')
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [userGroupIds, setUserGroupIds] = useState<string[]>([])
-
+  const [monthOffset, setMonthOffset] = useState(0)
   const [completedDates, setCompletedDates] = useState<Set<string>>(new Set())
-  const [prayerDates,    setPrayerDates]    = useState<Set<string>>(new Set())
-  const [fitnessDates,   setFitnessDates]   = useState<Set<string>>(new Set())
-
+  const [prayerDates, setPrayerDates]     = useState<Set<string>>(new Set())
+  const [fitnessDates, setFitnessDates]   = useState<Set<string>>(new Set())
   const [googleFitAuthorized, setGoogleFitAuthorized] = useState(false)
-  const [loading, setLoading]                         = useState(true)
+  const [loading, setLoading] = useState(true)
+
+  // **1. Compute which month we're viewing**
+  const viewDate = useMemo(() => addMonths(new Date(), monthOffset), [monthOffset])
 
   const navigate = useNavigate()
 
+  // --- auth + user metadata ---
   useEffect(() => {
     let unsubscribeUserDoc: Unsubscribe
 
@@ -74,6 +73,7 @@ export default function DashboardPage() {
     }
   }, [])
 
+  // --- fetch this month’s activity (now keyed off viewDate) ---
   useEffect(() => {
     if (!currentUser) {
       setCompletedDates(new Set())
@@ -83,10 +83,10 @@ export default function DashboardPage() {
     }
 
     const fetchCompleted = async () => {
-      const today = new Date()
+      // **use viewDate’s month** instead of always today
       const days = eachDayOfInterval({
-        start: startOfMonth(today),
-        end:   endOfMonth(today),
+        start: startOfMonth(viewDate),
+        end:   endOfMonth(viewDate),
       })
 
       const fullSet = new Set<string>()
@@ -112,9 +112,9 @@ export default function DashboardPage() {
             ? didFit
             : true
 
-          if (didPrayer)               praySet.add(dateKey)
-          if (didFit)                  fitSet.add(dateKey)
-          if (didPrayer && fitnessOk)  fullSet.add(dateKey)
+          if (didPrayer)              praySet.add(dateKey)
+          if (didFit)                 fitSet.add(dateKey)
+          if (didPrayer && fitnessOk) fullSet.add(dateKey)
         })
       )
 
@@ -124,7 +124,9 @@ export default function DashboardPage() {
     }
 
     fetchCompleted()
-  }, [currentUser])
+  }, [currentUser, viewDate])    // ← now re-runs when monthOffset/viewDate changes
+
+  // ... rest of your existing handlers (leave group, logout, etc.) unchanged ...
 
   const handleLeaveGroup = async (groupId: string) => {
     if (!currentUser) return
@@ -161,13 +163,31 @@ export default function DashboardPage() {
             <h1 className="welcome">Welcome, {userName}!</h1>
           </header>
 
-          <section>
-            <h2 className="section-title">📊 This Month’s Activity</h2>
+          <section className='section-box' >
+            <h2 className="section-title">📊Activity</h2>
+
+
             <MonthlyHeatmap
+              viewDate={viewDate}
               completedDates={completedDates}
               prayerDates={prayerDates}
               fitnessDates={fitnessDates}
             />
+            {/* 2. Month navigation */}
+            <div className='month-nav'>
+              <button
+                className="month-nav"
+                onClick={() => setMonthOffset((o) => o - 1)}
+              >
+                ← Prev
+              </button>
+              <button
+                className="month-nav"
+                onClick={() => setMonthOffset((o) => o + 1)}
+              >
+                Next →
+              </button>
+            </div>
           </section>
 
           {!googleFitAuthorized && (
