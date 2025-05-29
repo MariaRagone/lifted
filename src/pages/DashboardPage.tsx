@@ -159,9 +159,6 @@ export default function DashboardPage() {
         <>
           <header className="dashboard-header">
             <h1 className="welcome">Welcome, {userName}!</h1>
-            <h3 className="announcement">
-              This page is in test mode! Coming soon…stats and more.
-            </h3>
           </header>
 
           <section>
