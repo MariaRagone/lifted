@@ -1,4 +1,3 @@
-// src/components/GoogleFitMetrics.tsx
 import React, { useEffect, useState, useRef } from 'react';
 import { gapi } from 'gapi-script';
 import { isSameDay, parseISO } from 'date-fns';
@@ -8,7 +7,7 @@ import './GoogleFitMetrics.css';
 /// <reference types="gapi.auth2" />
 
 interface Props {
-  selectedDate: string; // yyyy-MM-dd
+  selectedDate: string; 
 }
 
 const CLIENT_ID     = import.meta.env.VITE_GOOGLE_CLIENT_ID!;
@@ -25,19 +24,16 @@ const GoogleFitMetrics: React.FC<Props> = ({ selectedDate }) => {
   const intervalRef = useRef<number | undefined>(undefined);
 
   const fetchGoogleFitData = async () => {
-    // ensure our token is fresh
     const auth2      = gapi.auth2.getAuthInstance();
     const googleUser = auth2.currentUser.get();
     await googleUser.reloadAuthResponse();
 
-    // compute daily window
     const day = parseISO(selectedDate);
     const start = new Date(day);
     start.setHours(0,0,0,0);
 
-    // if it's today, end at now; otherwise end at 23:59:59
     const end = isSameDay(day, new Date())
-      ? new Date()                // up to current time
+      ? new Date()                
       : (() => { const d = new Date(day); d.setHours(23,59,59,999); return d; })();
 
     try {
@@ -73,7 +69,6 @@ const GoogleFitMetrics: React.FC<Props> = ({ selectedDate }) => {
     }
   };
 
-  // 1) init gapi once
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
@@ -89,27 +84,21 @@ const GoogleFitMetrics: React.FC<Props> = ({ selectedDate }) => {
     })().catch(console.error);
   }, []);
 
-  // 2) on date change: fetch once + start/stop polling
   useEffect(() => {
-    // clear any existing
     if (intervalRef.current !== undefined) {
       clearInterval(intervalRef.current);
     }
 
-    // reset UI
     setSteps(null);
     setHeartPoints(null);
     setLastSync(null);
 
-    // immediate fetch
     fetchGoogleFitData();
 
-    // if today, poll every 20s
     if (isSameDay(parseISO(selectedDate), new Date())) {
       intervalRef.current = window.setInterval(fetchGoogleFitData, 20_000);
     }
 
-    // cleanup
     return () => {
       if (intervalRef.current !== undefined) {
         clearInterval(intervalRef.current);

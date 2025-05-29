@@ -15,7 +15,7 @@
 .welcome {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
-  color: #093d44;
+  color: #f9b95c;
   font-weight: 600;
 }
 
@@ -84,12 +84,12 @@ h4 {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-.section-title {
+/* .section-title {
   margin-top: 0;
   margin-bottom: 12px;
-  font-size: 1.25rem;
+  font-size: 14px;
   color: #093d44;
-}
+} */
 
 .circle-card {
   margin-bottom: 16px;

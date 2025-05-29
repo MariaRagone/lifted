@@ -5,7 +5,8 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   max-width: 400px;
   margin: 24px auto;
-  padding: 24px 20px;
+  padding-left: 8px;
+  padding-right: 8px;
   text-align: center;
   color: #093d44;
   position: relative;
@@ -50,7 +51,7 @@
   justify-content: center;
 }
 
-.login-info li::before {
+/* .login-info li::before {
   content: "";
   margin-right: 6px;
-}
+} */

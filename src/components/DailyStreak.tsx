@@ -29,7 +29,6 @@ return (
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="date"
-              // tickFormatter={(tick: string) => tick.slice(5)}
               interval={4}
               fontSize={10}
             />

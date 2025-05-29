@@ -1,4 +1,3 @@
-// src/components/WeeklyFitStats.tsx
 import React, { useEffect, useState } from 'react'
 import { format, subDays } from 'date-fns'
 import { fetchGoogleFitData } from '../../library/GoogleFitHelpers'

@@ -43,7 +43,7 @@ const LoginPage = () => {
         Sign in with Google
       </button>
     </div>
-
+    
       <AppInfo />
       </>
   );

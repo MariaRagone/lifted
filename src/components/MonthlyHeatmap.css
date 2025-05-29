@@ -30,7 +30,7 @@
 
 .mh-day {
   position: relative;
-  padding-top: 100%;   /* square */
+  padding-top: 100%;  
   border-radius: 4px;
   overflow: hidden;
 }
@@ -39,12 +39,12 @@
   background: transparent;
 }
 
-.mh-day.done {
-  background-color: #f9b95c;  /* completed color */
+.mh-day.not-done {
+  background-color: #e0e0e0; 
 }
 
-.mh-day.not-done {
-  background-color: #e0e0e0;  /* uncompleted color */
+.mh-day.done {
+  background-color: #fbe6c6;  
 }
 
 .mh-day-label {
@@ -55,7 +55,42 @@
   color: #093d44;
 }
 
-h2 {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #f9b95c;
+.mh-icon {
+  position: absolute;
+  font-size: 10px;
+}
+
+.mh-icon.prayer {
+  top: 2px;
+  right: 2px;
+}
+
+.mh-icon.fitness {
+  bottom: 2px;
+  right: 2px;
+}
+
+.mh-legend {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 12px;
+  font-size: 10px;
+  color: #333;
+}
+
+.mh-legend-item {
+  display: flex;
+  align-items: center;
+}
+
+.mh-legend-box {
+  width: 1em;
+  height: 1em;
+  border-radius: 2px;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.mh-legend-box.done {
+  background-color: #fbe6c6;
 }

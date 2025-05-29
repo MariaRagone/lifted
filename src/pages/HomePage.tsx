@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import './Home.css';
 
 type HomePageProps = {
-  currentUser?: any; // Replace with `User | null` if using Firebase types
+  currentUser?: any; 
 };
 
 const HomePage: React.FC<HomePageProps> = ({ currentUser }) => {

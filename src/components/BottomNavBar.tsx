@@ -1,4 +1,3 @@
-// src/components/BottomNavBar.tsx
 import { NavLink } from 'react-router-dom'
 import './BottomNavBar.css'
 import { FaDumbbell, FaUser, FaHeart } from 'react-icons/fa'

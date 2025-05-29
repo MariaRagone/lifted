@@ -4,7 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../library/firebase';
 import './DeployToast.css';
 
-const APP_VERSION = '2025-05-28-v3';
+const APP_VERSION = '2025-05-29-v1';
 
 const DeployToast: React.FC = () => {
   const [show, setShow] = useState(false);
@@ -43,8 +43,8 @@ const DeployToast: React.FC = () => {
     <div className="deploy-toast">
       <strong>🚀 What's New:</strong>
       <ul>
-        <li>📣 Added homepage and links for Google app verification visible to all users </li>
-        <li>📣 Dashboard updates</li>
+        <li>📣 Can see completed icons on calendar. </li>
+        <li>📣 Confetti for completed dates</li>
       </ul>
       <button onClick={dismissToast} className="toast-close">Got it</button>
 

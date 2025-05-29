@@ -1,4 +1,3 @@
-// src/components/GoogleFitDisconnect.tsx
 import React, { useEffect, useState } from 'react';
 import { gapi } from 'gapi-script';
 import { doc, setDoc } from 'firebase/firestore';
@@ -17,7 +16,6 @@ interface Props {
 const GoogleFitDisconnect: React.FC<Props> = ({ onDisconnect }) => {
   const [gapiReady, setGapiReady] = useState(false);
 
-  // Load & init gapi.client + auth2 once on mount
   useEffect(() => {
     const initGapi = async () => {
       try {
@@ -44,13 +42,10 @@ const GoogleFitDisconnect: React.FC<Props> = ({ onDisconnect }) => {
 
       const authInstance = gapi.auth2.getAuthInstance();
       if (authInstance) {
-        // revoke scopes
         await authInstance.disconnect();
-        // also sign out
         await authInstance.signOut();
       }
 
-      // update Firestore flag
       if (auth.currentUser) {
         await setDoc(
           doc(db, 'users', auth.currentUser.uid),
@@ -59,7 +54,6 @@ const GoogleFitDisconnect: React.FC<Props> = ({ onDisconnect }) => {
         );
       }
 
-      // inform parent
       onDisconnect();
     } catch (err) {
       console.error('Error disconnecting from Google Fit', err);

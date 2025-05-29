@@ -1,4 +1,3 @@
-// src/pages/DashboardPage.tsx
 import React, { useEffect, useState } from 'react'
 import { onAuthStateChanged, signOut, User } from 'firebase/auth'
 import {
@@ -35,13 +34,16 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState('')
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [userGroupIds, setUserGroupIds] = useState<string[]>([])
+
   const [completedDates, setCompletedDates] = useState<Set<string>>(new Set())
+  const [prayerDates,    setPrayerDates]    = useState<Set<string>>(new Set())
+  const [fitnessDates,   setFitnessDates]   = useState<Set<string>>(new Set())
+
   const [googleFitAuthorized, setGoogleFitAuthorized] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading]                         = useState(true)
 
   const navigate = useNavigate()
 
-  // 1) Auth + userName + groupIds + GoogleFit flag
   useEffect(() => {
     let unsubscribeUserDoc: Unsubscribe
 
@@ -72,10 +74,11 @@ export default function DashboardPage() {
     }
   }, [])
 
-  // 2) Fetch completedDates for current month (weekends count if prayerDone)
   useEffect(() => {
     if (!currentUser) {
       setCompletedDates(new Set())
+      setPrayerDates(new Set())
+      setFitnessDates(new Set())
       return
     }
 
@@ -83,35 +86,41 @@ export default function DashboardPage() {
       const today = new Date()
       const days = eachDayOfInterval({
         start: startOfMonth(today),
-        end: endOfMonth(today),
+        end:   endOfMonth(today),
       })
 
-      const doneSet = new Set<string>()
+      const fullSet = new Set<string>()
+      const praySet = new Set<string>()
+      const fitSet  = new Set<string>()
+
       await Promise.all(
         days.map(async (d) => {
           const dateKey = format(d, 'yyyy-MM-dd')
-          const cbDoc = await getDoc(
+          const cbDoc   = await getDoc(
             doc(db, 'days', dateKey, 'checkboxes', currentUser.uid)
           )
           if (!cbDoc.exists()) return
 
-          const cb = cbDoc.data() as {
+          const cb        = cbDoc.data() as {
             prayerDone?: boolean
             videoDone?: boolean
             otherFitnessDone?: boolean
           }
-          const prayerOk = !!cb.prayerDone
+          const didPrayer = !!cb.prayerDone
+          const didFit    = !!(cb.videoDone || cb.otherFitnessDone)
           const fitnessOk = isFitnessDay(dateKey)
-            ? (cb.videoDone || cb.otherFitnessDone)
+            ? didFit
             : true
 
-          if (prayerOk && fitnessOk) {
-            doneSet.add(dateKey)
-          }
+          if (didPrayer)               praySet.add(dateKey)
+          if (didFit)                  fitSet.add(dateKey)
+          if (didPrayer && fitnessOk)  fullSet.add(dateKey)
         })
       )
 
-      setCompletedDates(doneSet)
+      setCompletedDates(fullSet)
+      setPrayerDates(praySet)
+      setFitnessDates(fitSet)
     }
 
     fetchCompleted()
@@ -120,17 +129,15 @@ export default function DashboardPage() {
   const handleLeaveGroup = async (groupId: string) => {
     if (!currentUser) return
 
-    // remove from group members
     await setDoc(
       doc(db, 'groups', groupId, 'members', currentUser.uid),
       {},
       { merge: false }
     )
-    // remove from user doc
-    const userRef = doc(db, 'users', currentUser.uid)
-    const userSnap = await getDoc(userRef)
-    const currentGroups: string[] = userSnap.data()?.groupIds || []
-    const updated = currentGroups.filter((id) => id !== groupId)
+    const userRef   = doc(db, 'users', currentUser.uid)
+    const userSnap  = await getDoc(userRef)
+    const currentGs = userSnap.data()?.groupIds || []
+    const updated   = currentGs.filter((id: string) => id !== groupId)
     await setDoc(userRef, { groupIds: updated }, { merge: true })
     setUserGroupIds(updated)
   }
@@ -157,22 +164,19 @@ export default function DashboardPage() {
             </h3>
           </header>
 
-          
-            <section className="heatmap-section section-box">
-              <h2 className="section-title">📊 This Month’s Activity</h2>
-              <MonthlyHeatmap completedDates={completedDates} />
-            </section>
-         
-            {/* {googleFitAuthorized && (
-              <>
-                <GoogleFitWeeklyStats />
-                <GoogleFitDisconnect onDisconnect={() => setGoogleFitAuthorized(false)} />
-              </>
-            )} */}
+          <section>
+            <h2 className="section-title">📊 This Month’s Activity</h2>
+            <MonthlyHeatmap
+              completedDates={completedDates}
+              prayerDates={prayerDates}
+              fitnessDates={fitnessDates}
+            />
+          </section>
 
-            {!googleFitAuthorized && (
-              <GoogleFitConnect onAuthorized={() => setGoogleFitAuthorized(true)} />
-            )}
+          {!googleFitAuthorized && (
+            <GoogleFitConnect onAuthorized={() => setGoogleFitAuthorized(true)} />
+          )}
+
           {userGroupIds.length > 0 && (
             <section className="circles-section section-box">
               <h2 className="section-title">

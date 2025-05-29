@@ -1,4 +1,3 @@
-// src/components/GroupMembers.tsx
 import React, { useEffect, useState, useCallback } from 'react'
 import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore'
 import { auth, db } from '../library/firebase'

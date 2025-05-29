@@ -33,8 +33,9 @@
   height: 20px;
 }
 
-.link-container {
+.info-container {
   display: flex;
   justify-content: space-evenly;
+  max-height: 200px;
 }
 
