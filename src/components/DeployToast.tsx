@@ -43,7 +43,7 @@ const DeployToast: React.FC = () => {
     <div className="deploy-toast">
       <strong>🚀 What's New:</strong>
       <ul>
-        <li>📣 UI updates</li>
+        <li>📣 Added homepage and links for Google app verification visible to all users </li>
         <li>📣 Dashboard updates</li>
       </ul>
       <button onClick={dismissToast} className="toast-close">Got it</button>

@@ -21,7 +21,6 @@ const App: React.FC = () => {
           element={
             <>
               <AboutPage />
-              <BottomNavBar />
             </>
           }
         />
@@ -34,18 +33,16 @@ const App: React.FC = () => {
             </>
           }
         />
-
-        {/* protected routes */}
-        <Route element={<ProtectedRoute />}>        
-          <Route
+         <Route
             path="/"
             element={
               <>
                 <DashboardPage />
-                <BottomNavBar />
               </>
             }
           />
+
+        <Route element={<ProtectedRoute />}>        
           <Route
             path="/devotional"
             element={

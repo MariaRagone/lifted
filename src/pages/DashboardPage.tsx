@@ -9,7 +9,7 @@ import {
   setDoc
 } from 'firebase/firestore'
 import { auth, db } from '../library/firebase'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   format,
   startOfMonth,
@@ -29,6 +29,7 @@ import GroupMembers from '../components/GroupMemembers'
 import '../components/Buttons.css'
 import './Dashboard.css'
 import GoogleFitWeeklyStats from '../components/googleFit/GoogleFitWeeklyStats'
+import HomePage from './HomePage'
 
 export default function DashboardPage() {
   const [userName, setUserName] = useState('')
@@ -145,7 +146,7 @@ export default function DashboardPage() {
     <div className="container">
       <Logo size={200} />
 
-      {!currentUser && <p className="info-text">Please sign in.</p>}
+      {!currentUser && <HomePage />}
 
       {currentUser && (
         <>

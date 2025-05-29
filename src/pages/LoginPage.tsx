@@ -8,6 +8,7 @@ import "../components/Buttons.css";
 import './Login.css';
 import Logo from '../components/Logo';
 import AppInfo from '../components/AppInfo';
+import { Link } from 'react-router-dom';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ const LoginPage = () => {
   return (
     <>
     <div className="login-container">
-        <Logo size={200}/>
+        <Logo size={200} aria-label='logo of a cross and a dumbbell that says daily lift'/>
         <button className="google-login-button" onClick={handleGoogleLogin}>
         <img src={icon} className="google-icon" />
         Sign in with Google

@@ -14,7 +14,7 @@
   margin-bottom: 1rem;
 }
 .btn-primary {
-  background-color: #093d44; 
+  background-color: #093d44;
   color: #ffffff;
   margin-left: 20px;
   border: none;
@@ -22,6 +22,7 @@
   font-weight: bold;
   cursor: pointer;
   border-radius: 10px;
+  text-decoration: none;
 }
 
 .btn-primary:hover {
@@ -36,7 +37,9 @@
   color: white;
   font-weight: bold;
   cursor: pointer;
-  border-radius: 10px;}
+  border-radius: 10px;
+  text-decoration: none;
+}
 
 .btn-secondary:hover {
   background-color: #093d44;
@@ -52,5 +55,3 @@
   cursor: pointer;
   border-radius: 10px;
 }
-                 
-             

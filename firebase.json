@@ -1,4 +1,7 @@
 {
+   "functions": {
+    "runtime": "nodejs20"
+  },
   "hosting": {
     "public": "dist",
     "ignore": [

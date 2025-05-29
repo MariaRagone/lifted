@@ -34,5 +34,6 @@ serviceAccountKey.json
 .env
 /src/library
 /apis
+/functions
 
 
