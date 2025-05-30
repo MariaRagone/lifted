@@ -12,8 +12,8 @@ type Props = {
 
 export default function MonthlyHeatmap({ viewDate, completedDates, prayerDates, fitnessDates }: Props) {
   const today = new Date()
-  const start = startOfMonth(today)
-  const end = endOfMonth(today)
+  const start = startOfMonth(viewDate)
+  const end = endOfMonth(viewDate)
   const daysInMonth = eachDayOfInterval({ start, end })
 
 const weeks: (Date | null)[][] = []
