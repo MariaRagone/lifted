@@ -23,8 +23,8 @@ const App: React.FC = () => {
         <Route element={<ProtectedRoute />}>
           <Route element={<SignedInLayout />}>
             <Route path="/" element={<DashboardPage />} />
-            <Route path="/devotional" element={<DailyLiftPage />} />
-            <Route path="/favorites" element={<FavoritesPage />} />
+                <Route path="/devotional/:date" element={<DailyLiftPage />} />
+                <Route path="/favorites" element={<FavoritesPage />} />
             {/* catch-all for protected */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

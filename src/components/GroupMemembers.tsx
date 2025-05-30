@@ -8,9 +8,9 @@ interface GroupMembersProps {
   groupId: string
   selectedDate: string
   showFitness: boolean
-  showProgress?: boolean       // whether to display the progress bar
-  showCheckmarks?: boolean     // whether to show ✓ on avatars
-  showLeaveButton?: boolean    // whether to render a "Leave Group" button
+  showProgress?: boolean   
+  showCheckmarks?: boolean     
+  showLeaveButton?: boolean    
 }
 
 interface Member {

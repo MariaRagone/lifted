@@ -75,8 +75,11 @@ const GroupSelector: React.FC<GroupSelectorProps> = ({ user, onGroupJoined }) =>
   };
   
     return (
+      <div>
+
     <div className="group-selector">
       <h3>{mode === 'create' ? 'Create a Lift Circle' : 'Join a Lift Circle'}</h3>
+    
 
       <input
         type="text"
@@ -110,6 +113,10 @@ const GroupSelector: React.FC<GroupSelectorProps> = ({ user, onGroupJoined }) =>
         )}
       </p>
     </div>
+         <p className="circle-description">
+          Need a boost? <strong>Lift Circles</strong> pair you with friends for daily prayer & workouts.
+      </p>
+        </div>
   );
 };
 

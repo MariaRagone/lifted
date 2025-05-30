@@ -14,7 +14,7 @@ interface SelectedVideo {
 }
 
 interface WorkoutVideosProps {
-  selectedDate: string; 
+  selectedDate: string; // 'YYYY-MM-DD'
 }
 
 const WorkoutVideos: React.FC<WorkoutVideosProps> = ({ selectedDate }) => {
@@ -33,7 +33,7 @@ const WorkoutVideos: React.FC<WorkoutVideosProps> = ({ selectedDate }) => {
 
     const picks = orderedCategories
       .map(({ key, label }) => {
-        const v = dailySet[key];       
+        const v = dailySet[key];        // now okay, VideoMap has an index signature
         return v
           ? { category: label, title: v.title, embedUrl: v.embedUrl }
           : null;

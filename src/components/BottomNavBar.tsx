@@ -1,31 +1,42 @@
+// src/components/BottomNavBar.tsx
+import React from 'react'
 import { NavLink } from 'react-router-dom'
-import './BottomNavBar.css'
+import { format } from 'date-fns'
 import { FaDumbbell, FaUser, FaHeart } from 'react-icons/fa'
+import './BottomNavBar.css'
 
-const BottomNavBar = () => (
-  <nav className="bottom-nav">
-    <NavLink
-      to="/devotional"
-      className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
-    >
-      <FaDumbbell className="nav-icon" />
-    </NavLink>
+const BottomNavBar: React.FC = () => {
+  // build today’s date string once
+  const today = format(new Date(), 'yyyy-MM-dd')
 
-    <NavLink
-      to="/"
-      end
-      className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
-    >
-      <FaUser className="nav-icon" />
-    </NavLink>
+  return (
+    <nav className="bottom-nav">
+      {/* Devotional (Daily Lift) */}
+      <NavLink
+        to={`/devotional/${today}`}
+        className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+      >
+        <FaDumbbell className="nav-icon" />
+      </NavLink>
 
-    <NavLink
-      to="/favorites"
-      className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
-    >
-      <FaHeart className="nav-icon" />
-    </NavLink>
-  </nav>
-)
+      {/* Dashboard */}
+      <NavLink
+        to="/"
+        end
+        className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+      >
+        <FaUser className="nav-icon" />
+      </NavLink>
+
+      {/* Favorites */}
+      <NavLink
+        to="/favorites"
+        className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+      >
+        <FaHeart className="nav-icon" />
+      </NavLink>
+    </nav>
+  )
+}
 
 export default BottomNavBar

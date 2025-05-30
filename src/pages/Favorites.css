@@ -1,0 +1,12 @@
+.favorites-page { 
+    padding: 16px; 
+}
+.favorites-page h1 { 
+    color: #093d44; 
+}
+.favorites-page section { margin-top: 24px; }
+.favorites-page h2 { font-size: 1.1rem; color: #f1a84d; }
+.favorites-page ul { list-style: none; padding: 0; }
+.favorites-page li + li { margin-top: 8px; }
+.favorites-page a { color: #093d44; cursor: pointer; text-decoration: none; }
+.favorites-page small { color: #555; margin-left: 4px; font-size: 0.8rem; }

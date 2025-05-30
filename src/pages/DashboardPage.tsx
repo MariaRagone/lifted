@@ -173,7 +173,6 @@ export default function DashboardPage() {
               prayerDates={prayerDates}
               fitnessDates={fitnessDates}
             />
-            {/* 2. Month navigation */}
             <div className='month-nav'>
               <button
                 className="month-nav"
