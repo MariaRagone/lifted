@@ -8,9 +8,9 @@ interface GroupMembersProps {
   groupId: string
   selectedDate: string
   showFitness: boolean
-  showProgress?: boolean   
-  showCheckmarks?: boolean     
-  showLeaveButton?: boolean    
+  showProgress?: boolean
+  showCheckmarks?: boolean
+  showLeaveButton?: boolean
 }
 
 interface Member {
@@ -44,11 +44,10 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
     try {
       const membersRef = collection(db, 'groups', groupId, 'members')
       const snapshot = await getDocs(membersRef)
-
       const results = await Promise.all(
         snapshot.docs.map(async (docSnap) => {
           const uid = docSnap.id
-          const { displayName, profilePicUrl } = docSnap.data()
+          const { displayName, profilePicUrl } = docSnap.data() as any
           const cbSnap = await getDoc(doc(db, 'days', selectedDate, 'checkboxes', uid))
           const cb = cbSnap.exists() ? (cbSnap.data() as any) : DEFAULT_CHECKBOXES
           const completed = cb.prayerDone && (showFitness ? (cb.videoDone || cb.otherFitnessDone) : true)
@@ -61,8 +60,8 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
         const data = groupDoc.data() as any
         if (data.name) setGroupName(data.name)
       }
-    } catch (err) {
-      console.error('Error loading group members:', err)
+    } catch {
+      // ignore
     } finally {
       setLoading(false)
     }
@@ -84,6 +83,10 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
     fetchGroupInfo()
   }
 
+  const showCode = () => {
+    alert(`Circle Code: ${groupId}`)
+  }
+
   if (loading) return <p className="loading-text">Loading Lift Circle…</p>
 
   const completedCount = members.filter((m) => m.completed).length
@@ -98,11 +101,15 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
     <div className="group-members">
       <div className="group-header">
         <h4 className="group-name">{groupName}</h4>
+        <button className="btn-secondary show-code-button" onClick={showCode}>
+          Show Code
+        </button>
         {showLeaveButton && (
-          <button className="leave-group-button" onClick={handleLeaveGroup}>Leave</button>
+          <button className="leave-group-button" onClick={handleLeaveGroup}>
+            Leave
+          </button>
         )}
       </div>
-
       {showProgress && (
         <div className="group-progress">
           <div className="progress-bar-bg">
@@ -111,10 +118,11 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <p className="progress-label">{completedCount} of {members.length} completed</p>
+          <p className="progress-label">
+            {completedCount} of {members.length} completed
+          </p>
         </div>
       )}
-
       <div className="community-checkins">
         {members.map(({ uid, displayName, profilePicUrl, completed }) => (
           <div key={uid} className="user-checkin">

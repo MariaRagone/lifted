@@ -9,12 +9,14 @@ import AboutPage from './pages/AboutPage'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import ProtectedRoute from './pages/ProtectedRoute'
 import SignedInLayout from './components/SignedInLayout'
+import JoinPage from './pages/JoinPage'
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
         {/* PUBLIC */}
+        <Route path="/join" element={<JoinPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
